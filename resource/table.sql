@@ -9,7 +9,8 @@ create table if not exists shield --屏蔽
 (
     author_name     text not null primary key unique
         constraint author_con_connect references author (author_name),
-    author_shielded text --被author屏蔽的
+    author_shielded text                                                     --被author屏蔽的
+        constraint author_con_connect_shield references author (author_name) --增加了约束条件--Lwh,modified, 5.11
 );
 
 create table if not exists author_and_id
@@ -21,8 +22,9 @@ create table if not exists author_and_id
 create table if not exists city
 (
     city_id serial not null primary key unique,
-    city    text, --这里做了修改，将unique条件去除，因为有些城市名字重复，比如中国的北京和美国的北京
-    country text
+    city    text,                                --这里做了修改，将unique条件去除，因为有些城市名字重复，比如中国的北京和美国的北京
+    country text,
+    constraint uniqueCity unique (city, country) --增加约束条件,保证两者整体唯一--Lwh,modified, 5.11
 );
 create table if not exists post
 (
@@ -34,9 +36,8 @@ create table if not exists post
         constraint city_con references city (city_id),
     author_name     text      not null --5.11 改成了不是unique的
         constraint author_con_POST references author (author_name),
-    pic_or_video    varchar(255),      --图片或者视频
-    isUnknown       bool               --表示是不是匿名的，先初始化成false, 之后如果author选择匿名就变成true
-    --把post传给gui展示时如果这个值是true 就把author name 设置成'unknown'
+    fileName        text,       --文件名--Lwh,modified, 5.11
+    isUnknown       bool        --表示是不是匿名的，先初始化成false, 之后如果author选择匿名就变成true  --把post传给gui展示时如果这个值是true 就把author name 设置成'unknown'
 );
 
 
@@ -66,6 +67,7 @@ create table if not exists post_favorited
         constraint author_con_favor references author (author_name),--if not in author's field then generate id and add it to author's table
     primary key (post_id, author_name)
 );
+
 create table if not exists post_shared
 (
     post_id     integer not null
@@ -73,8 +75,8 @@ create table if not exists post_shared
     author_name text
         constraint author_con_share references author (author_name),--if not in author's field then generate id and add it to author's table
     primary key (post_id, author_name)
-
 );
+
 create table if not exists post_liked
 (
     post_id     integer not null
@@ -82,7 +84,6 @@ create table if not exists post_liked
     author_name text
         constraint author_con_like references author (author_name),--if not in author's field then generate id and add it to author's table
     primary key (post_id, author_name)
-
 );
 
 create table if not exists reply
@@ -105,5 +106,4 @@ create table if not exists sec_reply
     sec_reply_stars   integer not null,
     sec_reply_author  text    not null
         constraint author_con_secreply references author (author_name)--if not in author's field then generate id and add it to author's table
-
 );

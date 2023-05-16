@@ -5,7 +5,6 @@ public class Response implements Serializable
     String responseType;
     String responseContent;
 
-
     public Response(String responseType, String responseContent)
     {
         this.responseType = responseType;
