@@ -28,6 +28,7 @@ import javafx.scene.paint.Paint;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.awt.*;
@@ -211,7 +212,7 @@ public class window1 extends Application {
     }
 
     public static void write_post(Socket socket, ObjectOutputStream oos, ObjectInputStream iis) throws FileNotFoundException {
-        FileInputStream input = new FileInputStream("./writeBack.jpeg");
+        FileInputStream input = new FileInputStream("./R-C.jpeg");
         Image image = new Image(input);
         ImageView backGround = new ImageView(image);
 
@@ -230,12 +231,22 @@ public class window1 extends Application {
         Label city = new Label("City:");
         city.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
 
-        Label filel = new Label("fileName:");
+        Button filel = new Button("Choose your File:");
         filel.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 12));
 
         TextField tt = new TextField();//文本框
         tt.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 20));
         tt.setPrefWidth(500);
+
+        RadioButton niming = new RadioButton("匿名发送");
+        niming.setUserData("false");
+        niming.selectedProperty().addListener(new ChangeListener<Boolean>() {   //r1监听单独
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                niming.setUserData(newValue);
+            }
+        });
+
 
         TextArea contt = new TextArea();//
         contt.setPrefHeight(180);
@@ -253,9 +264,28 @@ public class window1 extends Application {
         TextField file = new TextField();
         file.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 12));
 
+        Stage stageFile = new Stage();
+        FileChooser chooser = new FileChooser();
+        chooser.setInitialDirectory(new File("C:\\Users\\20699\\Desktop"));   //设置初始路径，默认为我的电脑
+        chooser.setTitle("选择图片或视频");
+//        chooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("JPG", "*.jpg"),
+//                new FileChooser.ExtensionFilter("PNG", "*.png"), new FileChooser.ExtensionFilter("JPEG", "*.jpeg"),
+//                new FileChooser.ExtensionFilter("GIF", "*.gif"), new FileChooser.ExtensionFilter("MP4", "*.mp4")
+//        );
+//        String fileName;
+        //筛选文件扩展
+        Label temp = new Label();
+        filel.setOnMouseClicked(e -> {
+            try {
+                File fileChoosen = chooser.showOpenDialog(stageFile);
+                temp.setText(fileChoosen.getAbsolutePath());
+                filel.setText(fileChoosen.getName());
+            } catch (NullPointerException ex) {
+            }
 
+        });
         tt.setPromptText("Title...");
-//        contt.setPromptText("Share interesting things...");
+        contt.setPromptText("Share interesting things...");
         country_text.setPromptText("Your country name..");
         city_text.setPromptText("Your city name..");
 
@@ -265,8 +295,12 @@ public class window1 extends Application {
         Label wrongMess1 = new Label("");
         wrongMess1.setTextFill(Color.web("#FF4136"));
         wrongMess1.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
-        group.getChildren().addAll(title, tt, content, contt, filel, file, button, wrongMess1);
+        group.getChildren().addAll(title, tt, content, contt, filel, wrongMess1);
 
+        HBox butt = new HBox(5);
+        butt.getChildren().addAll(button, niming);
+        butt.setLayoutY(480);
+        butt.setLayoutX(40);
         HBox cou_city = new HBox(5);
         cou_city.setLayoutY(600);
         cou_city.getChildren().addAll(country, country_text, city, city_text);
@@ -276,8 +310,9 @@ public class window1 extends Application {
         Stage stage = new Stage();
         button.setOnAction(e -> {
             try {
-                Command command = new Command("PublishPost", new String[]{userName, tt.getText(), contt.getText(), country_text.getText(), city_text.getText()});
-//                ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+//                System.out.println(niming.getUserData().toString());
+                Command command = new Command("PublishPost", new String[]{userName, tt.getText(), contt.getText(), country_text.getText(),
+                        city_text.getText(), filel.getText(), niming.getUserData().toString()}, fileToByte(temp.getText()) );
                 oos.writeObject(command);
                 oos.flush();
 
@@ -287,8 +322,6 @@ public class window1 extends Application {
                     stage.close();
                 }
                 wrongMess1.setText(response.responseContent);
-                System.out.println(response.responseContent);
-//                apiSpecification.PublishPost(userName, tt.getText(), contt.getText(), country_text.getText(), city_text.getText());
 
             } catch (Exception ex) {
                 String message = ex.getMessage();
@@ -297,7 +330,7 @@ public class window1 extends Application {
         });
 
 
-        Group groupAll = new Group(backGround, group, cou_city);
+        Group groupAll = new Group(backGround, group, butt, cou_city);
         Scene scene = new Scene(groupAll, 600, 700);
 
         stage.setScene(scene);
@@ -305,6 +338,21 @@ public class window1 extends Application {
         stage.setY(200);
 
         stage.show();
+    }
+
+    public static byte[] fileToByte(String filePath) {
+        byte[] fileBytes = null;
+        FileInputStream fis = null;
+        try {
+            File file = new File(filePath);
+            fis = new FileInputStream(file);
+            fileBytes = new byte[(int) file.length()];
+            fis.read(fileBytes);
+            fis.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return fileBytes;
     }
 
     public static TableView<Post> my_post(int pageIndex, int pageSize, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
