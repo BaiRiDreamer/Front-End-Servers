@@ -183,7 +183,7 @@ public class window1 extends Application {
         g1.getChildren().addAll(menuBar, searchBy, search, searchBtn);
 
         Pagination pagination = new Pagination(calPostCnt(socket, oos, iis) / 49 + 1, 0);
-        pagination.setPageFactory(pageIndex -> createPage(pageIndex, 50, socket, oos, iis));
+        pagination.setPageFactory(pageIndex -> Tables.createPage(pageIndex, 50, socket, oos, iis));
         pagination.setLayoutY(30);
         Group group = new Group(g1, pagination);
 
@@ -352,8 +352,8 @@ public class window1 extends Application {
 
     public static TableView<Post> my_post(int pageIndex, int pageSize, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
         int page = pageIndex * pageSize;
-        TableView<Post> postTable = createTable();
-        List<Post> postList = getMyPostData(page, page + pageSize, socket, oos, iis);
+        TableView<Post> postTable = Tables.createTable();
+        List<Post> postList = Tables.getMyPostData(page, page + pageSize, socket, oos, iis);
         postTable.setItems(FXCollections.observableList(postList));
 
         postTable.setPrefHeight(300);
@@ -440,26 +440,29 @@ public class window1 extends Application {
 
                     stage.show();
                 } else if (st[new_value.intValue()].equals("Follow List")) {
-                    Group groupAll = new Group(group);
-                    Scene scene = new Scene(groupAll, 600, 600);
-
+                    Pagination pagination_like = new Pagination(5, 0);
+                    pagination_like.setPageFactory(pageIndex -> {
+                        try {
+                            return Tables.createPage_Follow(pageIndex, 10, "getUserFollowBy", oos, iis);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            return null;
+                        }
+                    });
+                    pagination_like.setLayoutY(200);
+                    Group group_r1 = new Group(group, pagination_like);
+                    Scene scene = new Scene(group_r1, 600, 600);
                     stage.setScene(scene);
-
-
                     stage.show();
                 } else if (st[new_value.intValue()].equals("Quit")) {
                     signIn(stage, socket, oos, iis);
                 } else {
                     Group groupAll = new Group(group);
                     Scene scene = new Scene(groupAll, 600, 600);
-
                     stage.setScene(scene);
-
-
                     stage.show();
                 }
                 // set the text for the label to the selected item
-
             }
         });
 
@@ -490,27 +493,9 @@ public class window1 extends Application {
         );
     }
 
-    public static TableView<Post> createTable() {
-        TableView<Post> table = new TableView<>();
-        TableColumn<Post, Integer> idCol = new TableColumn<>("PostID");
-        idCol.setCellValueFactory(new PropertyValueFactory("postID"));
-        TableColumn<Post, String> titleCol = new TableColumn<>("Title");
-        titleCol.setCellValueFactory(new PropertyValueFactory("title"));
-        TableColumn<Post, String> contentCol = new TableColumn<>("Content");
-        contentCol.setCellValueFactory(new PropertyValueFactory("content"));
-        TableColumn<Post, Integer> auCol = new TableColumn<>("Author");
-        auCol.setCellValueFactory(new PropertyValueFactory("authorName"));
-        TableColumn<Post, Integer> timeCol = new TableColumn<>("Post Time");
-        timeCol.setCellValueFactory(new PropertyValueFactory("postingTime"));
-
-        table.getColumns().addAll(idCol, titleCol, contentCol, auCol, timeCol);
-//        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        return table;
-    }
-
 
     public static int calPostCnt(Socket socket, ObjectOutputStream oos, ObjectInputStream iis) throws Exception {
-        Command command = new Command("getPostCnt", new String[]{});
+        Command command = new Command("getPostCnt", new String[]{userName});
 //        ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
         oos.writeObject(command);
         oos.flush();
@@ -538,134 +523,9 @@ public class window1 extends Application {
         return 1;
     }
 
-    public static List<Post> getMyPostData(int from, int to, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
-        List<Post> postData = new ArrayList<>();
-        //ResultSet resultSet;
-        try {
-            Command command = new Command("getPublishedPost", new String[]{userName});
-//            ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-            oos.writeObject(command);
-            oos.flush();
-
-            // 接收查询结果
-            Response response = (Response) iis.readObject();
-            String post_json = response.responseContent;
-            ;
-            List<Post> posts = JSON.parseArray(post_json, Post.class);
-            //resultSet = apiSpecification.getPublishedPost(userName);
-
-            for (int i = from; i <= to; i++) {
-                if (posts.size() == 0) {
-                    break;
-                }
-                Post p = new Post();
-//                resultSet.absolute(i);//限定第几行
-                p.setPostID(posts.get(i).getPostID());
-
-                p.setTitle(posts.get(i).getTitle());
-//                    String t = resultSet.getString("title");
-                p.setContent(posts.get(i).getContent());
-                p.setAuthorName(posts.get(i).getAuthorName());
-                p.setPostingTime(posts.get(i).getPostingTime());
-                postData.add(p);
-//                p.setPostID(posts.get(i).getInt("post_id"));
-//
-//                p.setTitle(resultSet.getString("title"));
-////                    String t = resultSet.getString("title");
-//                p.setContent(resultSet.getString("content"));
-//                p.setAuthorName(resultSet.getString("author_name"));
-//                p.setPostingTime(resultSet.getTimestamp("posting_time"));
-//                postData.add(p);
-            }
-
-        } catch (Exception ex) {
-            String message = ex.getMessage();
-            System.out.println(message);
-        }
-        return postData;
-    }
-
-    public static List<Post> getTableData(int from, int to, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
-        List<Post> postData = new ArrayList<>();
-        try {
-            Command command = new Command("getAllPost", new String[]{});
-            oos.writeObject(command);
-            oos.flush();
-
-            // 接收查询结果
-            Response response = (Response) iis.readObject();
-            String post_json = response.responseContent;
-            List<Post> posts = JSON.parseArray(post_json, Post.class);
-            for (int i = from; i <= to; i++) {
-                if (posts.size() == 0) {
-                    break;
-                }
-                Post p = new Post();
-                p.setPostID(posts.get(i).getPostID());
-                p.setTitle(posts.get(i).getTitle());
-                p.setContent(posts.get(i).getContent());
-                p.setAuthorName(posts.get(i).getAuthorName());
-                p.setPostingTime(posts.get(i).getPostingTime());
-                postData.add(p);
-            }
-        } catch (Exception ex) {
-            String message = ex.getMessage();
-            System.out.println(message);
-        }
-        return postData;
-    }
 
     static int reactAuthorCnt;
 
-    public static TableView<Post> createTable_react() {
-        TableView<Post> table = new TableView<>();
-        TableColumn<Post, Integer> auCol = new TableColumn<>("Author");
-        auCol.setCellValueFactory(new PropertyValueFactory("authorName"));
-        auCol.setPrefWidth(180);
-        table.getColumns().addAll(auCol);
-//        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        return table;
-    }
-
-    public static TableView<Post> createPage_react(int pageIndex, int pageSize, String reactType, int postId, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
-        int page = pageIndex * pageSize;
-        TableView<Post> postTable = createTable_react();
-        List<Post> postList = getTableData_react(page, page + pageSize, postId, reactType, socket, oos, iis);
-        postTable.setItems(FXCollections.observableList(postList));
-
-        postTable.setPrefHeight(350);
-        postTable.setPrefWidth(200);
-//        group.getChildren().addAll(g1, postTable);
-        TableView<Post> sw = postTable;
-        return postTable;
-    }
-
-    public static List<Post> getTableData_react(int from, int to, int postId, String react_type, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
-        List<Post> postData = new ArrayList<>();
-        try {
-            Command command = new Command(react_type, new String[]{postId + ""});
-            oos.writeObject(command);
-            oos.flush();
-
-            // 接收查询结果
-            Response response = (Response) iis.readObject();
-            String post_json = response.responseContent;
-            List<Post> posts = JSON.parseArray(post_json, Post.class);
-            reactAuthorCnt = posts.size();
-            for (int i = from; i <= to; i++) {
-                if (posts.size() == 0) {
-                    break;
-                }
-                Post p = new Post();
-                p.setAuthorName(posts.get(i).getAuthorName());
-                postData.add(p);
-            }
-        } catch (Exception ex) {
-            String message = ex.getMessage();
-            System.out.println(message);
-        }
-        return postData;
-    }
 
     public static void react_with_post(Label label_mess, Button react_byn, ObjectOutputStream oos, ObjectInputStream iis, int postId, String reactType, String output, String t2) {
         Command command1 = new Command(reactType, new String[]{userName, postId + ""});
@@ -691,7 +551,35 @@ public class window1 extends Application {
 
     }
 
-    public static void see_react_authors(Label label_mess, Button react_byn, ObjectOutputStream oos, ObjectInputStream iis, int postId, String reactType, String output, String t2) {
+    public static void see_react_authors(ObjectOutputStream oos, ObjectInputStream iis, int postId, String reactType, Socket socket) {
+        Stage smallStage = new Stage();
+
+        Point pp = MouseInfo.getPointerInfo().getLocation();
+        smallStage.setX(pp.getX());//出现在屏幕中的位置
+        smallStage.setY(pp.getY());
+
+        Pagination pagination_like = new Pagination(reactAuthorCnt / 29 + 1, 0);
+        pagination_like.setPageFactory(pageIndex -> Tables.createPage_react(pageIndex, 25, reactType, postId, socket, oos, iis));
+        pagination_like.setLayoutY(0);
+        Group group_r1 = new Group(pagination_like);
+
+        Scene scene = new Scene(group_r1, 200, 400);
+        smallStage.setScene(scene);
+        smallStage.show();
+
+    }
+
+    public static void see_replies(ObjectOutputStream oos, ObjectInputStream iis, int postId, String reactType, Socket socket) {
+        Stage smallStage = new Stage();
+
+        Pagination pagination_like = new Pagination(Tables.replyCnt / 29 + 1, 0);
+        pagination_like.setPageFactory(pageIndex -> Tables.createPage_reply(pageIndex, 25, reactType, postId, socket, oos, iis));
+        pagination_like.setLayoutY(0);
+        Group group_r1 = new Group(pagination_like);
+
+        Scene scene = new Scene(group_r1, 600, 600);
+        smallStage.setScene(scene);
+        smallStage.show();
 
     }
 
@@ -819,57 +707,18 @@ public class window1 extends Application {
                 setHandle(seeLikes);
                 seeLikes.setOnAction(e ->
                 {
-                    Stage smallStage = new Stage();
-
-                    Point pp = MouseInfo.getPointerInfo().getLocation();
-                    smallStage.setX(pp.getX());//出现在屏幕中的位置
-                    smallStage.setY(pp.getY());
-
-                    Pagination pagination_like = new Pagination(reactAuthorCnt / 29 + 1, 0);
-                    pagination_like.setPageFactory(pageIndex -> createPage_react(pageIndex, 25, "getPostLiked", postId, socket, oos, iis));
-                    pagination_like.setLayoutY(0);
-                    Group group_r1 = new Group(pagination_like);
-
-                    Scene scene = new Scene(group_r1, 200, 400);
-                    smallStage.setScene(scene);
-                    smallStage.show();
+                    see_react_authors(oos, iis, postId, "getPostLiked", socket);
                 });
                 setHandle(seeShares);
                 seeShares.setOnAction(e ->
                         {
-                            VBox vBox1 = new VBox();
-                            Scene scene = new Scene(vBox1, 200, 400);
-                            //场景放到舞台中
-
-                            Stage smallStage = new Stage();
-                            smallStage.setScene(scene);
-                            Point pp = MouseInfo.getPointerInfo().getLocation();
-                            smallStage.setX(pp.getX());//出现在屏幕中的位置
-                            smallStage.setY(pp.getY());
-                            smallStage.show();
+                            see_react_authors(oos, iis, postId, "getPostShared", socket);
                         }
                 );
                 setHandle(seeFavorites);
                 seeFavorites.setOnAction(e ->
                         {
-                            VBox vBox1 = new VBox();
-                            Scene scene = new Scene(vBox1, 200, 400);
-                            //场景放到舞台中
-
-                            Stage smallStage = new Stage();
-                            smallStage.setScene(scene);
-                            Point pp = MouseInfo.getPointerInfo().getLocation();
-                            smallStage.setX(pp.getX());//出现在屏幕中的位置
-                            smallStage.setY(pp.getY());
-//                            stage.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<>() {
-//
-//                                public void handle(MouseEvent event) {
-//                                    smallStage.close();
-//                                }
-//
-//                            });
-
-                            smallStage.show();
+                            see_react_authors(oos, iis, postId, "getPostfavorited", socket);
                         }
                 );
                 setHandle(follow_au);
@@ -905,12 +754,12 @@ public class window1 extends Application {
                 setHandle(reply);
                 reply.setOnAction(e ->
                         {
-
                         }
                 );
                 setHandle(seeReply);
                 seeReply.setOnAction(e ->
                         {
+                            see_replies(oos, iis, postId, "getPostReply", socket);
 
                         }
                 );
@@ -950,34 +799,6 @@ public class window1 extends Application {
                         "-fx-font-family: 'Microsoft YaHei UI';" +
                         "-fx-font-size: " + size + ";"
         );
-    }
-
-    public static TableView<Post> createPage(int pageIndex, int pageSize, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
-        int page = pageIndex * pageSize;
-        TableView<Post> postTable = createTable();
-        List<Post> postList = getTableData(page, page + pageSize, socket, oos, iis);
-        postTable.setItems(FXCollections.observableList(postList));
-
-        postTable.setPrefHeight(500);
-        postTable.setPrefWidth(600);
-//        group.getChildren().addAll(g1, postTable);
-        TableView<Post> sw = postTable;
-        postTable.setRowFactory(tv -> //双击查看post detail
-        {
-            TableRow<Post> row = new TableRow<>();
-            row.setOnMouseClicked(event -> {
-                if (event.getClickCount() == 2 && (!row.isEmpty())) {
-                    int p_id = sw.getSelectionModel().getSelectedItems().get(0).getPostID();
-                    try {
-                        postDetail(p_id, socket, oos, iis);
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-            return row;
-        });
-        return postTable;
     }
 
 

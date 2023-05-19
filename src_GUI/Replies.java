@@ -1,5 +1,6 @@
 public class Replies {
     private int postID;
+    private int replyID;
     private String replyContent;
     private int replyStars;
     private String replyAuthor;
@@ -10,8 +11,9 @@ public class Replies {
     public Replies() {
     }
 
-    public Replies(int postID, String replyContent, int replyStars, String replyAuthor, String secondaryReplyContent, int secondaryReplyStars, String secondaryReplyAuthor) {
+    public Replies(int postID, int replyID, String replyContent, int replyStars, String replyAuthor, String secondaryReplyContent, int secondaryReplyStars, String secondaryReplyAuthor) {
         this.postID = postID;
+        this.replyID = replyID;
         this.replyContent = replyContent;
         this.replyStars = replyStars;
         this.replyAuthor = replyAuthor;
@@ -26,6 +28,13 @@ public class Replies {
 
     public void setPostID(int postID) {
         this.postID = postID;
+    }
+    public int getReplyID() {
+        return replyID;
+    }
+
+    public void setReplyID(int replyID) {
+        this.replyID = replyID;
     }
 
     public String getReplyContent() {
@@ -86,6 +95,7 @@ public class Replies {
                 ", secondaryReplyContent='" + secondaryReplyContent + '\'' +
                 ", secondaryReplyStars=" + secondaryReplyStars +
                 ", secondaryReplyAuthor='" + secondaryReplyAuthor + '\'' +
+                ", replyID=" + replyID +'\'' +
                 '}';
     }
 }

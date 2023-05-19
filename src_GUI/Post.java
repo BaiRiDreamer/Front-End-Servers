@@ -71,7 +71,7 @@ public class Post {
     public String getAuthorPhone () {
         return authorPhone;
     }
-    public List<String> getAuthorFollowedBy() {
+    public  List<String> getAuthorFollowedBy() {
         return authorFollowedBy;
     }
     public List<String> getAuthorFavorite() {
