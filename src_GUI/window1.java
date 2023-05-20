@@ -37,10 +37,22 @@ import java.util.Objects;
 
 import javafx.scene.control.Pagination;
 import javafx.scene.control.TableView;
+import sun.misc.IOUtils;
+
+import java.io.ByteArrayInputStream;
+
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.layout.StackPane;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaView;
 
 import javax.imageio.ImageIO;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class window1 extends Application {
 
@@ -127,18 +139,51 @@ public class window1 extends Application {
         home_page.getItems().addAll(p);
         self.getItems().addAll(self_space, write_post);
         menuBar.getMenus().addAll(home_page, self);
+        String[] search1 = {"Author", "Title", "Content", "PostID"};
 
-        ChoiceBox<String> searchBy = new ChoiceBox<>(FXCollections.observableArrayList("Author", "Title", "Content", "PostID"));
+        ChoiceBox<String> searchBy = new ChoiceBox<>(FXCollections.observableArrayList(search1));
         searchBy.setValue("Author");
         searchBy.setLayoutX(310);
         TextField search = new TextField();
         search.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 12));
         search.setPromptText("Search...");
         search.setLayoutX(390);
-
         Button searchBtn = new Button("Search");
+
         setBtn_tp(searchBtn, "cadetblue", 12);
         searchBtn.setLayoutX(550);
+
+        searchBtn.setOnAction(e -> {
+            System.out.println(search.getText());
+            if (searchBy.getValue().equals("Author")) {
+                try {
+                    get_search(stage, g1, socket, search.getText(), "", "", 0, oos, iis);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            } else if (searchBy.getValue().equals("Title")) {
+                try {
+                    get_search(stage, g1, socket,  "",search.getText(), "", 0, oos, iis);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            } else if (searchBy.getValue().equals("Content")) {
+                try {
+                    get_search(stage, g1, socket, "", "",search.getText() ,0, oos, iis);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            } else if (searchBy.getValue().equals("PostID")) {
+                try {
+                    get_search(stage, g1, socket, search.getText(), "", "", 0, oos, iis);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+            // set the text for the label to the selected item
+
+        });
+
         p.setOnAction(e ->
                 {
                     try {
@@ -184,6 +229,22 @@ public class window1 extends Application {
         stage.setResizable(false);
         stage.show();
 
+    }
+
+    public static void get_search(Stage stage, Group g1, Socket socket, String author_name, String title, String content, int postId, ObjectOutputStream oos, ObjectInputStream iis) throws Exception {
+        Pagination pagination = new Pagination(5, 0);
+        pagination.setPageFactory(pageIndex -> Tables.createPage_search(pageIndex, 20, author_name, title, content, postId + "", socket, oos, iis));
+        pagination.setLayoutY(30);
+        Group group = new Group(g1, pagination);
+
+        Scene scene = new Scene(group, 600, 600);
+
+        //场景放到舞台中
+        stage.setScene(scene);
+//        stage.setX(700);//出现在屏幕中的位置
+//        stage.setY(200);
+        stage.setResizable(false);
+        stage.show();
     }
 
     public static void write_post(Socket socket, ObjectOutputStream oos, ObjectInputStream iis) throws FileNotFoundException {
@@ -743,6 +804,9 @@ public class window1 extends Application {
                                 seePhoto.setDisable(true);
                                 seePhoto.setText("No picture or video");
                             } else {
+                                Stage showPic = new Stage();
+//                                if (Pattern.matches(p.getFilename(), "*.jpg") || Pattern.matches(p.getFilename(), "*.png") ||
+//                                        Pattern.matches(p.getFilename(), "*.jpeg")) {
                                 byte[] imageData = p.getFile(); // 从数据库中读取byte[]类型的数据
                                 BufferedImage image1 = null;
                                 try {
@@ -768,25 +832,55 @@ public class window1 extends Application {
                                 double image_height = height;
                                 double image_width = width;
                                 if (width > 800 || height > 800) {
-                                    if(width>height){
+                                    if (width > height) {
                                         image_width = 800;
-                                        image_height = 800.0/width*height;
-                                    }else{
+                                        image_height = 800.0 / width * height;
+                                    } else {
                                         image_height = 800;
-                                        image_width = 800.0/height*width;
+                                        image_width = 800.0 / height * width;
                                     }
+
                                 }
 
                                 Image image_user = new Image(input1, image_width, image_height, false, false);
 
                                 ImageView imageView_user = new ImageView(image_user);
-                                Stage showPic = new Stage();
                                 showPic.setTitle("Picture or Video");
 //                                imageView_user.setLayoutY(400);
                                 Group group1 = new Group(imageView_user);
                                 Scene scene1 = new Scene(group1, 800, 800);
                                 showPic.setScene(scene1);
                                 showPic.show();
+//                                }
+//                                else{
+//                                    byte[] videoData =p.getFile(); // your byte array
+//
+//                                    String filePath = ".\\video.mp4";
+//                                    File file = new File(filePath);
+//                                    FileOutputStream fos = null;
+//                                    try {
+//                                        fos = new FileOutputStream(file);
+//                                    } catch (FileNotFoundException ex) {
+//                                        ex.printStackTrace();
+//                                    }
+//                                    try {
+//                                        fos.write(videoData);
+//                                        fos.close();
+//                                    } catch (IOException ex) {
+//                                        ex.printStackTrace();
+//                                    }
+//
+//                                    Media media = new Media(file.toURI().toString());
+//                                    MediaPlayer mediaPlayer = new MediaPlayer(media);
+//                                    MediaView mediaView= new MediaView(mediaPlayer);
+//                                    StackPane root = new StackPane();
+//                                    root.getChildren().add(mediaView);
+//                                    Scene scene = new Scene(root, 600, 600);
+//                                    showPic.setScene(scene);
+//                                    showPic.show();
+//                                    mediaPlayer.play();
+//
+//                                }
                             }
                         }
                 );

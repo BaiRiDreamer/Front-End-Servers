@@ -56,40 +56,6 @@ public class Tables {
         return table;
     }
 
-    public static List<Post> getMyPostData(int from, int to, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
-        List<Post> postData = new ArrayList<>();
-        //ResultSet resultSet;
-        try {
-            Command command = new Command("getPublishedPost", new String[]{window1.userName});
-            oos.writeObject(command);
-            oos.flush();
-
-            // 接收查询结果
-            Response response = (Response) iis.readObject();
-            String post_json = response.responseContent;
-            ;
-            List<Post> posts = JSON.parseArray(post_json, Post.class);
-
-            for (int i = from; i <= to; i++) {
-                if (posts.size() == 0) {
-                    break;
-                }
-                Post p = new Post();
-                p.setPost_id(posts.get(i).getPost_id());
-                p.setTitle(posts.get(i).getTitle());
-                p.setContent(posts.get(i).getContent());
-                p.setAuthor_name(posts.get(i).getAuthor_name());
-                p.setPosting_time(posts.get(i).getPosting_time());
-                postData.add(p);
-            }
-
-        } catch (Exception ex) {
-            String message = ex.getMessage();
-            System.out.println(message);
-        }
-        return postData;
-    }
-
     public static List<Post> getTableData(int from, int to, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
         List<Post> postData = new ArrayList<>();
         try {
@@ -118,6 +84,107 @@ public class Tables {
                 p.setPosting_time(posts.get(i).getPosting_time());
                 postData.add(p);
             }
+        } catch (Exception ex) {
+            String message = ex.getMessage();
+            System.out.println(message);
+        }
+        return postData;
+    }
+
+    public static TableView<Post> createPage_search(int pageIndex, int pageSize, String author_name, String title, String content, String postId, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
+        int page = pageIndex * pageSize;
+        TableView<Post> postTable = createTable();
+        List<Post> postList = getTableData_search(page, page + pageSize, author_name, title, content, postId + "", socket, oos, iis);
+        postTable.setItems(FXCollections.observableList(postList));
+
+        postTable.setPrefHeight(500);
+        postTable.setPrefWidth(600);
+//        group.getChildren().addAll(g1, postTable);
+        TableView<Post> sw = postTable;
+        postTable.setRowFactory(tv -> //双击查看post detail
+        {
+            TableRow<Post> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (!row.isEmpty())) {
+                    int p_id = sw.getSelectionModel().getSelectedItems().get(0).getPost_id();
+                    try {
+                        window1.postDetail(p_id, socket, oos, iis);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            return row;
+        });
+        return postTable;
+    }
+
+
+    public static List<Post> getTableData_search(int from, int to, String author_name, String title, String content, String postId, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
+        List<Post> postData = new ArrayList<>();
+        try {
+            Command command = new Command("searchPostAnd", new String[]{author_name, title, content, postId});
+            oos.writeObject(command);
+            oos.flush();
+
+            // 接收查询结果
+            Response response = (Response) iis.readObject();
+            String post_json = response.responseContent;
+            List<Post> posts = JSON.parseArray(post_json, Post.class);
+            for (int i = from; i <= to; i++) {
+                if (posts.size() == 0) {
+                    break;
+                }
+                if (!posts.get(i).isUnKnown) {
+                    Post p = new Post();
+
+                    p.setPost_id(posts.get(i).getPost_id());
+                    p.setTitle(posts.get(i).getTitle());
+                    p.setContent(posts.get(i).getContent());
+                    if (posts.get(i).isUnKnown()) {
+                        p.setAuthor_name("Unknown");
+                    } else {
+                        p.setAuthor_name(posts.get(i).getAuthor_name());
+                    }
+                    p.setPosting_time(posts.get(i).getPosting_time());
+                    postData.add(p);
+                }
+            }
+        } catch (Exception ex) {
+            String message = ex.getMessage();
+            System.out.println(message);
+        }
+        return postData;
+    }
+
+
+    public static List<Post> getMyPostData(int from, int to, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
+        List<Post> postData = new ArrayList<>();
+        //ResultSet resultSet;
+        try {
+            Command command = new Command("getPublishedPost", new String[]{window1.userName});
+            oos.writeObject(command);
+            oos.flush();
+
+            // 接收查询结果
+            Response response = (Response) iis.readObject();
+            String post_json = response.responseContent;
+            ;
+            List<Post> posts = JSON.parseArray(post_json, Post.class);
+
+            for (int i = from; i <= to; i++) {
+                if (posts.size() == 0) {
+                    break;
+                }
+                Post p = new Post();
+                p.setPost_id(posts.get(i).getPost_id());
+                p.setTitle(posts.get(i).getTitle());
+                p.setContent(posts.get(i).getContent());
+                p.setAuthor_name(posts.get(i).getAuthor_name());
+                p.setPosting_time(posts.get(i).getPosting_time());
+                postData.add(p);
+            }
+
         } catch (Exception ex) {
             String message = ex.getMessage();
             System.out.println(message);
@@ -361,7 +428,7 @@ public class Tables {
         return table;
     }
 
-    public static TableView<Author_foll> createPage_Follow(int pageIndex, int pageSize,Pagination pagination_like, Label mess, String react_type, ObjectOutputStream oos, ObjectInputStream iis) throws Exception {
+    public static TableView<Author_foll> createPage_Follow(int pageIndex, int pageSize, Pagination pagination_like, Label mess, String react_type, ObjectOutputStream oos, ObjectInputStream iis) throws Exception {
         int page = pageIndex * pageSize;
         TableView<Author_foll> postTable = createTable_Foll_author();
 
@@ -379,7 +446,7 @@ public class Tables {
                     String authorName = sw.getSelectionModel().getSelectedItems().get(0).getFollowedAuthorName();
                     try {
 //                        window1.postDetail(p_id, socket, oos, iis);
-                        window1.unfoll_author(authorName, mess,pagination_like, oos, iis);
+                        window1.unfoll_author(authorName, mess, pagination_like, oos, iis);
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     }
