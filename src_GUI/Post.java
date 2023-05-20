@@ -3,6 +3,22 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Post {
+    public String getFilename() {
+        return filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
+
+    public byte[] getFile() {
+        return file;
+    }
+
+    public void setFile(byte[] file) {
+        this.file = file;
+    }
+
     public int post_id;
     public String title;
     public String content;

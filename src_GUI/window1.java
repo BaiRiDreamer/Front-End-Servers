@@ -29,6 +29,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.Socket;
 import java.util.List;
@@ -37,6 +38,7 @@ import java.util.Objects;
 import javafx.scene.control.Pagination;
 import javafx.scene.control.TableView;
 
+import javax.imageio.ImageIO;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
@@ -395,7 +397,7 @@ public class window1 extends Application {
 
         Button retBack = new Button("<--Back");
         setBtn_tp(retBack, "Blue", 20);
-        String[] st = {"My posts", "Follow List", "Quit", "My Likes", "My Shares", "My Favorites", "My Replies"};
+        String[] st = {"My posts", "Follow List", "My Likes", "My Shares", "My Favorites", "My Replies", "Quit"};
         ChoiceBox<String> choiceBox = new ChoiceBox<>(FXCollections.observableArrayList(st));
         choiceBox.setValue("My posts");
         choiceBox.setLayoutX(500);
@@ -666,13 +668,18 @@ public class window1 extends Application {
         HBox seeReacts = new HBox(20);
         HBox message = new HBox(20);
         HBox reply_post = new HBox(20);
+        Group block = new Group();
 
+        Group group = new Group();
         react.setLayoutY(400);
         seeReacts.setLayoutY(440);
         message.setLayoutY(480);
         message.setLayoutX(80);
         reply_post.setLayoutY(550);
-        Group group = new Group(imageView, vBox, react, seeReacts, message, reply_post);
+        block.setLayoutX(550);
+        block.setLayoutY(550);
+        Button block_btn = new Button("Block this user");
+        block.getChildren().add(block_btn);
 
         try {
             Command command = new Command("getIthIdPost", new String[]{postId + ""});
@@ -685,6 +692,8 @@ public class window1 extends Application {
             List<Post> posts = JSON.parseArray(post_json, Post.class);
             if (posts.size() != 0) {
                 Post p = posts.get(0);
+                group = new Group(imageView, vBox, react, seeReacts, message, reply_post, block);
+
                 Text id = new Text("id: " + p.getPost_id() + "");
                 id.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
 
@@ -711,9 +720,9 @@ public class window1 extends Application {
                 Button seeShares = new Button("See Shares");
                 Button seeFavorites = new Button("See Favorites");
                 Button follow_au = new Button("Follow the author");
-//                Button reply = new Button("Reply");
                 Button seeReply = new Button("See Replies");
                 Button sendReply = new Button("Send Reply");
+                Button seePhoto = new Button("View picture or video");
 
                 like.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
 
@@ -725,8 +734,62 @@ public class window1 extends Application {
                     au = new Text(p.getAuthor_name());
                 }
                 au.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 18));
-                vBox.getChildren().addAll(id, au, title, content, time);
+                vBox.getChildren().addAll(id, au, title, content, time, seePhoto);
 
+
+                seePhoto.setOnAction(e ->
+                        {
+                            if (p.getFile() == null) {
+                                seePhoto.setDisable(true);
+                                seePhoto.setText("No picture or video");
+                            } else {
+                                byte[] imageData = p.getFile(); // 从数据库中读取byte[]类型的数据
+                                BufferedImage image1 = null;
+                                try {
+                                    image1 = ImageIO.read(new ByteArrayInputStream(imageData));
+                                } catch (IOException ex) {
+                                    ex.printStackTrace();
+                                }
+                                // 将BufferedImage对象保存为文件
+                                File file = new File(".\\my_image.jpg");
+                                try {
+                                    ImageIO.write(image1, "jpg", file);
+                                } catch (IOException ex) {
+                                    ex.printStackTrace();
+                                }
+                                FileInputStream input1 = null;
+                                try {
+                                    input1 = new FileInputStream(".\\my_image.jpg");
+                                } catch (FileNotFoundException ex) {
+                                    ex.printStackTrace();
+                                }
+                                int height = image1.getHeight();
+                                int width = image1.getWidth();
+                                double image_height = height;
+                                double image_width = width;
+                                if (width > 800 || height > 800) {
+                                    if(width>height){
+                                        image_width = 800;
+                                        image_height = 800.0/width*height;
+                                    }else{
+                                        image_height = 800;
+                                        image_width = 800.0/height*width;
+                                    }
+                                }
+
+                                Image image_user = new Image(input1, image_width, image_height, false, false);
+
+                                ImageView imageView_user = new ImageView(image_user);
+                                Stage showPic = new Stage();
+                                showPic.setTitle("Picture or Video");
+//                                imageView_user.setLayoutY(400);
+                                Group group1 = new Group(imageView_user);
+                                Scene scene1 = new Scene(group1, 800, 800);
+                                showPic.setScene(scene1);
+                                showPic.show();
+                            }
+                        }
+                );
 
                 setBtn_tp(like, "cadetblue", 20);
                 setBtn_tp(share, "cadetblue", 20);
@@ -738,6 +801,8 @@ public class window1 extends Application {
 //                setBtn_tp(reply, "cadetblue", 20);
                 setBtn_tp(seeReply, "cadetblue", 20);
                 setBtn_tp(sendReply, "blue", 15);
+                setBtn_tp(block_btn, "black", 12);
+                setBtn_tp(seePhoto, "cadetblue", 15);
 
                 Label label_mess = new Label("--");
                 label_mess.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 20));
@@ -750,6 +815,7 @@ public class window1 extends Application {
                 react.getChildren().addAll(like, share, favorite, follow_au);
                 seeReacts.getChildren().addAll(seeLikes, seeShares, seeFavorites, seeReply);
                 message.getChildren().addAll(label_mess);
+                block.setLayoutX(500);
                 reply_post.getChildren().addAll(reply_post_t, sendReply);
                 setHandle(like);
                 like.setOnAction(e ->
@@ -850,14 +916,37 @@ public class window1 extends Application {
                 seeReply.setOnAction(e ->
                         {
                             see_replies(oos, iis, postId, "getPostReply", socket);
-
                         }
                 );
+                block_btn.setOnAction(e ->
+                {
+                    Command command1 = null;
+                    command1 = new Command("blockUser", new String[]{userName, p.getAuthor_name()});
+                    try {
+                        oos.writeObject(command1);
+                        oos.flush();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                    // 接收查询结果
+                    try {
+                        Response response1 = (Response) iis.readObject();
+                        if (response1.responseType.equals("true")) {
+                            label_mess.setText("屏蔽成功!");
+                        } else {
+                            label_mess.setText("您已经屏蔽过了");
+                        }
+                    } catch (IOException | ClassNotFoundException ex) {
+                        ex.printStackTrace();
+                        label_mess.setText("屏蔽失败");
+                    }
+                });
             }
         } catch (Exception ex) {
             String messagew = ex.getMessage();
             System.out.println(messagew);
         }
+
 
         Scene scene = new Scene(group, 600, 600);
         //场景放到舞台中
@@ -994,7 +1083,7 @@ public class window1 extends Application {
                     mess.setText("取消关注成功!");
                     pagination_like.setPageFactory(pageIndex -> {
                         try {
-                            return Tables.createPage_Follow(pageIndex, 10,pagination_like, mess, "getUserFollowBy", oos, iis);
+                            return Tables.createPage_Follow(pageIndex, 10, pagination_like, mess, "getUserFollowBy", oos, iis);
                         } catch (Exception e1) {
                             e1.printStackTrace();
                             return null;
