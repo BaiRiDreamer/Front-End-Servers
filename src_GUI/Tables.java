@@ -189,6 +189,25 @@ public class Tables {
         return postData;
     }
 
+
+    public static TableView<Replies> createTable_reply() {
+        TableView<Replies> table = new TableView<>();
+        TableColumn<Replies, Integer> re_idCol = new TableColumn<>("Reply ID");
+        re_idCol.setCellValueFactory(new PropertyValueFactory("replyID"));
+        TableColumn<Replies, Integer> postId = new TableColumn<>("Post ID");
+        postId.setCellValueFactory(new PropertyValueFactory("postID"));
+        TableColumn<Replies, String> re_conCol = new TableColumn<>("Content");
+        re_conCol.setCellValueFactory(new PropertyValueFactory("replyContent"));
+        TableColumn<Replies, Integer> starCol = new TableColumn<>("Reply stars");
+        starCol.setCellValueFactory(new PropertyValueFactory("replyStars"));
+        TableColumn<Replies, String> replyAuthor = new TableColumn<>("Reply Author");
+        replyAuthor.setCellValueFactory(new PropertyValueFactory("replyAuthor"));
+
+        table.getColumns().addAll(re_idCol, postId, re_conCol, starCol, replyAuthor);
+//        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        return table;
+    }
+
     public static List<Replies> getTableData_reply(int from, int to, int postId, String react_type, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
         List<Replies> postData = new ArrayList<>();
         try {
@@ -219,24 +238,6 @@ public class Tables {
             System.out.println(message);
         }
         return postData;
-    }
-
-    public static TableView<Replies> createTable_reply() {
-        TableView<Replies> table = new TableView<>();
-        TableColumn<Replies, Integer> re_idCol = new TableColumn<>("Reply ID");
-        re_idCol.setCellValueFactory(new PropertyValueFactory("replyID"));
-        TableColumn<Replies, Integer> postId = new TableColumn<>("Post ID");
-        postId.setCellValueFactory(new PropertyValueFactory("postID"));
-        TableColumn<Replies, String> re_conCol = new TableColumn<>("Content");
-        re_conCol.setCellValueFactory(new PropertyValueFactory("replyContent"));
-        TableColumn<Replies, Integer> starCol = new TableColumn<>("Reply stars");
-        starCol.setCellValueFactory(new PropertyValueFactory("replyStars"));
-        TableColumn<Replies, Integer> replyAuthor = new TableColumn<>("Reply Author");
-        replyAuthor.setCellValueFactory(new PropertyValueFactory("replyAuthor"));
-
-        table.getColumns().addAll(re_idCol, postId, re_conCol, starCol, replyAuthor);
-//        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        return table;
     }
 
     public static TableView<Replies> createPage_reply(int pageIndex, int pageSize, String reactType, int postId, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
@@ -367,7 +368,7 @@ public class Tables {
 //    }
 
 
-    public static List<Author_foll> getTableData_foll(int from, int to, String react_type, ObjectOutputStream oos, ObjectInputStream iis) throws Exception {
+    public static List<Author_foll> getTableData_foll(int from, int to, Label mess, String react_type, ObjectOutputStream oos, ObjectInputStream iis) throws Exception {
         List<Author_foll> postData = new ArrayList<>();
 //        List<Post> posts = null;
 
@@ -410,22 +411,186 @@ public class Tables {
         return table;
     }
 
-    public static TableView<Author_foll> createPage_Follow(int pageIndex, int pageSize, String react_type, ObjectOutputStream oos, ObjectInputStream iis) throws Exception {
+    public static TableView<Author_foll> createPage_Follow(int pageIndex, int pageSize, Label mess, String react_type, ObjectOutputStream oos, ObjectInputStream iis) throws Exception {
         int page = pageIndex * pageSize;
         TableView<Author_foll> postTable = createTable_Foll_author();
 
-        List<Author_foll> postList = getTableData_foll(page, page + pageSize, react_type, oos, iis);
-//        for (int i = 0; i < postList.get(0).getAuthorFollowedBy().size(); i++) {
-//            postTable.getItems().add(postList.get(0));
-//        }
+        List<Author_foll> postList = getTableData_foll(page, page + pageSize, mess, react_type, oos, iis);
         postTable.setItems(FXCollections.observableList(postList));
 
         postTable.setPrefHeight(350);
         postTable.setPrefWidth(200);
-//        group.getChildren().addAll(g1, postTable);
-//        TableView<Post> sw = postTable;
+        TableView<Author_foll> sw = postTable;
+        postTable.setRowFactory(tv -> //双击查看post detail
+        {
+            TableRow<Author_foll> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (!row.isEmpty())) {
+                    String authorName = sw.getSelectionModel().getSelectedItems().get(0).getFollowedAuthorName();
+                    try {
+//                        window1.postDetail(p_id, socket, oos, iis);
+                        window1.unfoll_author(authorName, mess, oos, iis);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            return row;
+        });
         return postTable;
     }
 
+    public static List<Post> getTableData_my_reactions(int from, int to,String reactType, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
+        List<Post> postData = new ArrayList<>();
+        try {
+            Command command = new Command(reactType, new String[]{window1.userName});
+            oos.writeObject(command);
+            oos.flush();
+
+            // 接收查询结果
+            Response response = (Response) iis.readObject();
+            String post_json = response.responseContent;
+            List<Post> posts = JSON.parseArray(post_json, Post.class);
+            for (int i = from; i <= to; i++) {
+                if (posts.size() == 0) {
+                    break;
+                }
+                Post p = new Post();
+                p.setPostID(posts.get(i).getPostID());
+                p.setTitle(posts.get(i).getTitle());
+                p.setContent(posts.get(i).getContent());
+                p.setAuthorName(posts.get(i).getAuthorName());
+                p.setPostingTime(posts.get(i).getPostingTime());
+                postData.add(p);
+            }
+        } catch (Exception ex) {
+            String message = ex.getMessage();
+            System.out.println(message);
+        }
+        return postData;
+    }
+
+    public static TableView<Post> createPage_my_reactions(int pageIndex, int pageSize,String reactType, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
+        int page = pageIndex * pageSize;
+        TableView<Post> postTable = createTable_my_reactions();
+        List<Post> postList = getTableData_my_reactions(page, page + pageSize,reactType, socket, oos, iis);
+        postTable.setItems(FXCollections.observableList(postList));
+
+        postTable.setPrefHeight(350);
+        postTable.setPrefWidth(600);
+//        group.getChildren().addAll(g1, postTable);
+        TableView<Post> sw = postTable;
+        postTable.setRowFactory(tv -> //双击查看post detail
+        {
+            TableRow<Post> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (!row.isEmpty())) {
+                    int p_id = sw.getSelectionModel().getSelectedItems().get(0).getPostID();
+                    try {
+                        window1.postDetail(p_id, socket, oos, iis);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            return row;
+        });
+        return postTable;
+    }
+
+    public static TableView<Post> createTable_my_reactions() {
+        TableView<Post> table = new TableView<>();
+        TableColumn<Post, Integer> idCol = new TableColumn<>("PostID");
+        idCol.setCellValueFactory(new PropertyValueFactory("postID"));
+        TableColumn<Post, String> titleCol = new TableColumn<>("Title");
+        titleCol.setCellValueFactory(new PropertyValueFactory("title"));
+        TableColumn<Post, String> contentCol = new TableColumn<>("Content");
+        contentCol.setCellValueFactory(new PropertyValueFactory("content"));
+        TableColumn<Post, Integer> auCol = new TableColumn<>("Author");
+        auCol.setCellValueFactory(new PropertyValueFactory("authorName"));
+        TableColumn<Post, Integer> timeCol = new TableColumn<>("Post Time");
+        timeCol.setCellValueFactory(new PropertyValueFactory("postingTime"));
+
+        table.getColumns().addAll(idCol, titleCol, contentCol, auCol, timeCol);
+//        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        return table;
+    }
+
+    public static TableView<Replies> createTable_my_reply() {
+        TableView<Replies> table = new TableView<>();
+        TableColumn<Replies, Integer> re_idCol = new TableColumn<>("Reply ID");
+        re_idCol.setCellValueFactory(new PropertyValueFactory("replyID"));
+        TableColumn<Replies, Integer> postId = new TableColumn<>("Post ID");
+        postId.setCellValueFactory(new PropertyValueFactory("postID"));
+        TableColumn<Replies, String> re_conCol = new TableColumn<>("Content");
+        re_conCol.setCellValueFactory(new PropertyValueFactory("replyContent"));
+        TableColumn<Replies, Integer> starCol = new TableColumn<>("Reply stars");
+        starCol.setCellValueFactory(new PropertyValueFactory("replyStars"));
+        TableColumn<Replies, String> post_content = new TableColumn<>("Post content");
+        post_content.setCellValueFactory(new PropertyValueFactory("content"));
+
+        table.getColumns().addAll(re_idCol, postId, re_conCol,  post_content,starCol);
+//        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        return table;
+    }
+
+    public static List<Replies> getTableData_my_reply(int from, int to,String react_type, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
+        List<Replies> postData = new ArrayList<>();
+        try {
+            Command command = new Command(react_type, new String[]{window1.userName});
+            oos.writeObject(command);
+            oos.flush();
+
+            // 接收查询结果
+            Response response = (Response) iis.readObject();
+            String replies_json = response.responseContent;
+            List<Replies> replies = JSON.parseArray(replies_json, Replies.class);
+            replyCnt = replies.size();
+            for (int i = from; i <= to; i++) {
+                if (replyCnt == 0) {
+                    break;
+                }
+                Replies r = new Replies();
+                r.setPostID(replies.get(i).getPostID());
+                r.setReplyID(replies.get(i).getReplyID());
+                r.setReplyContent(replies.get(i).getReplyContent());
+                r.setReplyStars(replies.get(i).getReplyStars());
+                r.setContent(replies.get(i).getContent());
+                postData.add(r);
+            }
+        } catch (Exception ex) {
+            String message = ex.getMessage();
+            System.out.println(message);
+        }
+        return postData;
+    }
+
+    public static TableView<Replies> createPage_my_reply(int pageIndex, int pageSize, String reactType, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
+        int page = pageIndex * pageSize;
+        TableView<Replies> replyTable = createTable_my_reply();
+        List<Replies> replyList = getTableData_my_reply(page, page + pageSize, reactType, socket, oos, iis);
+        replyTable.setItems(FXCollections.observableList(replyList));
+
+        replyTable.setPrefHeight(350);
+        replyTable.setPrefWidth(600);
+//        group.getChildren().addAll(g1, postTable);
+        TableView<Replies> sw = replyTable;
+        replyTable.setRowFactory(tv -> //双击查看post detail
+        {
+            TableRow<Replies> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (!row.isEmpty())) {
+                    int r_id = sw.getSelectionModel().getSelectedItems().get(0).getReplyID();
+//                    try {
+//                        replyDetail(r_id,postId, socket, oos, iis);
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+                }
+            });
+            return row;
+        });
+        return replyTable;
+    }
 
 }

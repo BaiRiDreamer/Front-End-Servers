@@ -7,6 +7,7 @@ public class Replies {
     private String secondaryReplyContent;
     private int secondaryReplyStars;
     private String secondaryReplyAuthor;
+    private String content;
 
     public Replies() {
     }
@@ -29,6 +30,7 @@ public class Replies {
     public void setPostID(int postID) {
         this.postID = postID;
     }
+
     public int getReplyID() {
         return replyID;
     }
@@ -57,6 +59,12 @@ public class Replies {
         return replyAuthor;
     }
 
+    public String getContent() {
+        return content;
+    }
+    public void setContent(String content) {
+        this.content = content;
+    }
     public void setReplyAuthor(String replyAuthor) {
         this.replyAuthor = replyAuthor;
     }
@@ -95,7 +103,7 @@ public class Replies {
                 ", secondaryReplyContent='" + secondaryReplyContent + '\'' +
                 ", secondaryReplyStars=" + secondaryReplyStars +
                 ", secondaryReplyAuthor='" + secondaryReplyAuthor + '\'' +
-                ", replyID=" + replyID +'\'' +
+                ", replyID=" + replyID + '\'' +
                 '}';
     }
 }

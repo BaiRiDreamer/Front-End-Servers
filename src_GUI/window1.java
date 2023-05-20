@@ -404,7 +404,7 @@ public class window1 extends Application {
 
         Button retBack = new Button("<--Back");
         setBtn_tp(retBack, "Blue", 20);
-        String[] st = {"My posts", "Follow List", "Quit"};
+        String[] st = {"My posts", "Follow List", "Quit", "My Likes", "My Shares", "My Favorites", "My Replies"};
         ChoiceBox<String> choiceBox = new ChoiceBox<>(FXCollections.observableArrayList(st));
         choiceBox.setValue("My posts");
         choiceBox.setLayoutX(500);
@@ -434,26 +434,51 @@ public class window1 extends Application {
                     pagination.setLayoutY(200);
                     Group groupAll = new Group(group, pagination);
                     Scene scene = new Scene(groupAll, 600, 600);
-
                     stage.setScene(scene);
-
-
                     stage.show();
                 } else if (st[new_value.intValue()].equals("Follow List")) {
+                    Label mess = new Label("");
+                    mess.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 20));
+
                     Pagination pagination_like = new Pagination(5, 0);
                     pagination_like.setPageFactory(pageIndex -> {
                         try {
-                            return Tables.createPage_Follow(pageIndex, 10, "getUserFollowBy", oos, iis);
+                            return Tables.createPage_Follow(pageIndex, 10, mess, "getUserFollowBy", oos, iis);
                         } catch (Exception e) {
                             e.printStackTrace();
                             return null;
                         }
                     });
                     pagination_like.setLayoutY(200);
-                    Group group_r1 = new Group(group, pagination_like);
+                    pagination_like.setLayoutX(200);
+
+                    mess.setLayoutX(420);
+                    mess.setLayoutY(350);
+
+                    Group group_r1 = new Group(group, pagination_like, mess);
                     Scene scene = new Scene(group_r1, 600, 600);
                     stage.setScene(scene);
                     stage.show();
+                } else if (st[new_value.intValue()].equals("My Likes")) {
+                    try {
+                        getUserHadReacted(stage, group, socket, "getUserHadLiked", oos, iis);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else if (st[new_value.intValue()].equals("My Shares")) {
+                    try {
+                        getUserHadReacted(stage, group, socket, "getUserHadShared", oos, iis);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else if (st[new_value.intValue()].equals("My Favorites")) {
+                    try {
+                        getUserHadReacted(stage, group, socket, "getUserHadFavorited", oos, iis);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else if (st[new_value.intValue()].equals("My Replies")) {
+                    see_my_replies(stage, group, oos, iis, "getUserHadReply", socket);
                 } else if (st[new_value.intValue()].equals("Quit")) {
                     signIn(stage, socket, oos, iis);
                 } else {
@@ -480,6 +505,22 @@ public class window1 extends Application {
         stage.setX(700);//出现在屏幕中的位置
         stage.setY(200);
 
+        stage.show();
+    }
+
+    public static void getUserHadReacted(Stage stage, Group g1, Socket socket, String reactType, ObjectOutputStream oos, ObjectInputStream iis) throws Exception {
+        Pagination pagination = new Pagination(5, 0);
+        pagination.setPageFactory(pageIndex -> Tables.createPage_my_reactions(pageIndex, 20, reactType, socket, oos, iis));
+        pagination.setLayoutY(200);
+        Group group = new Group(g1, pagination);
+
+        Scene scene = new Scene(group, 600, 600);
+
+        //场景放到舞台中
+        stage.setScene(scene);
+//        stage.setX(700);//出现在屏幕中的位置
+//        stage.setY(200);
+        stage.setResizable(false);
         stage.show();
     }
 
@@ -572,7 +613,7 @@ public class window1 extends Application {
     public static void see_replies(ObjectOutputStream oos, ObjectInputStream iis, int postId, String reactType, Socket socket) {
         Stage smallStage = new Stage();
 
-        Pagination pagination_like = new Pagination(Tables.replyCnt / 29 + 1, 0);
+        Pagination pagination_like = new Pagination(Tables.replyCnt / 24 + 1, 0);
         pagination_like.setPageFactory(pageIndex -> Tables.createPage_reply(pageIndex, 25, reactType, postId, socket, oos, iis));
         pagination_like.setLayoutY(0);
         Group group_r1 = new Group(pagination_like);
@@ -581,6 +622,19 @@ public class window1 extends Application {
         smallStage.setScene(scene);
         smallStage.show();
 
+    }
+
+    public static void see_my_replies(Stage stage, Group g1, ObjectOutputStream oos, ObjectInputStream iis, String reactType, Socket socket) {
+//        Stage smallStage = new Stage();
+
+        Pagination pagination_like = new Pagination(Tables.replyCnt / 14 + 1, 0);
+        pagination_like.setPageFactory(pageIndex -> Tables.createPage_my_reply(pageIndex, 15, reactType, socket, oos, iis));
+        pagination_like.setLayoutY(200);
+        Group group_r1 = new Group(g1, pagination_like);
+
+        Scene scene = new Scene(group_r1, 600, 600);
+        stage.setScene(scene);
+        stage.show();
     }
 
     public static Post getIthPost(int postId, ObjectOutputStream oos, ObjectInputStream iis) throws IOException, ClassNotFoundException {
@@ -617,13 +671,14 @@ public class window1 extends Application {
         HBox react = new HBox(20);
         HBox seeReacts = new HBox(20);
         HBox message = new HBox(20);
+        HBox reply_post = new HBox(20);
 
         react.setLayoutY(400);
         seeReacts.setLayoutY(440);
         message.setLayoutY(480);
         message.setLayoutX(80);
-        Group group = new Group(imageView, vBox, react, seeReacts, message);
-
+        reply_post.setLayoutY(550);
+        Group group = new Group(imageView, vBox, react, seeReacts, message, reply_post);
 
         try {
             Command command = new Command("getIthIdPost", new String[]{postId + ""});
@@ -665,8 +720,9 @@ public class window1 extends Application {
                 Button seeShares = new Button("See Shares");
                 Button seeFavorites = new Button("See Favorites");
                 Button follow_au = new Button("Follow the author");
-                Button reply = new Button("Reply");
+//                Button reply = new Button("Reply");
                 Button seeReply = new Button("See Replies");
+                Button sendReply = new Button("Send Reply");
 
                 like.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
 
@@ -677,15 +733,22 @@ public class window1 extends Application {
                 setBtn_tp(seeShares, "cadetblue", 20);
                 setBtn_tp(seeFavorites, "cadetblue", 20);
                 setBtn_tp(follow_au, "cadetblue", 20);
-                setBtn_tp(reply, "cadetblue", 20);
+//                setBtn_tp(reply, "cadetblue", 20);
                 setBtn_tp(seeReply, "cadetblue", 20);
+                setBtn_tp(sendReply, "blue", 15);
 
                 Label label_mess = new Label("--");
                 label_mess.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 20));
 
-                react.getChildren().addAll(like, share, favorite, follow_au, reply);
+                TextField reply_post_t = new TextField();
+                reply_post_t.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
+                reply_post_t.setPromptText("Reply this Post...");
+
+
+                react.getChildren().addAll(like, share, favorite, follow_au);
                 seeReacts.getChildren().addAll(seeLikes, seeShares, seeFavorites, seeReply);
                 message.getChildren().addAll(label_mess);
+                reply_post.getChildren().addAll(reply_post_t, sendReply);
                 setHandle(like);
                 like.setOnAction(e ->
                         {
@@ -751,9 +814,34 @@ public class window1 extends Application {
                             }
                         }
                 );
-                setHandle(reply);
-                reply.setOnAction(e ->
+                setHandle(sendReply);
+                sendReply.setOnAction(e ->
                         {
+                            String reply = reply_post_t.getText();
+                            if (reply.equals("")) {
+                                label_mess.setText("回复不能为空");
+                            } else {
+                                Command command1 = null;
+                                command1 = new Command("replyPost", new String[]{postId + "", userName, reply});
+                                try {
+                                    oos.writeObject(command1);
+                                    oos.flush();
+                                } catch (IOException ex) {
+                                    ex.printStackTrace();
+                                }
+                                // 接收查询结果
+                                try {
+                                    Response response1 = (Response) iis.readObject();
+                                    if (response1.responseType.equals("true")) {
+                                        label_mess.setText("回复成功!");
+                                    } else {
+                                        label_mess.setText("回复失败");
+                                    }
+                                } catch (IOException | ClassNotFoundException ex) {
+                                    ex.printStackTrace();
+                                    label_mess.setText("回复失败");
+                                }
+                            }
                         }
                 );
                 setHandle(seeReply);
@@ -777,9 +865,47 @@ public class window1 extends Application {
         stage.setResizable(false);
         stage.show();
 
-
     }
 
+    public static void unfoll_author(String authorname, Label mess, ObjectOutputStream oos, ObjectInputStream iis) throws FileNotFoundException {
+        Stage stage1 = new Stage();
+        Button unfoll = new Button("取消关注");
+        VBox vBox = new VBox();
+        vBox.getChildren().add(unfoll);
+        Group group = new Group(vBox);
+        setHandle(unfoll);
+        unfoll.setOnAction(e ->
+        {
+            try {
+                Command command = new Command("unFollowUser", new String[]{userName, authorname});
+                oos.writeObject(command);
+                oos.flush();
+
+                // 接收查询结果
+                Response response = (Response) iis.readObject();
+                if (response.responseType.equals("true")) {
+                    mess.setText("取消关注成功!");
+                    stage1.close();
+                } else {
+                    mess.setText("您还未关注过该作者");
+                }
+            } catch (Exception ex) {
+                String messagew = ex.getMessage();
+                System.out.println(messagew);
+            }
+        });
+
+
+        Scene scene = new Scene(group, 200, 100);
+        //场景放到舞台中
+        stage1.setScene(scene);
+        stage1.setX(700);//出现在屏幕中的位置
+        stage1.setY(200);
+        stage1.setResizable(false);
+        stage1.show();
+
+
+    }
 
     public static void setHandle(Button button) {
         button.addEventHandler(MouseEvent.MOUSE_ENTERED, (e) -> {
