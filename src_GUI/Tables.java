@@ -1,27 +1,11 @@
 import com.alibaba.fastjson.JSON;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
-import javafx.scene.Group;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Label;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.Paint;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
-import javafx.stage.Stage;
-import javafx.util.Callback;
 
-import java.awt.*;
-import java.awt.Button;
 import java.io.*;
 import java.net.Socket;
-import java.rmi.server.RemoteRef;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +25,7 @@ public class Tables {
             TableRow<Post> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && (!row.isEmpty())) {
-                    int p_id = sw.getSelectionModel().getSelectedItems().get(0).getPostID();
+                    int p_id = sw.getSelectionModel().getSelectedItems().get(0).getPost_id();
                     try {
                         window1.postDetail(p_id, socket, oos, iis);
                     } catch (FileNotFoundException e) {
@@ -57,15 +41,15 @@ public class Tables {
     public static TableView<Post> createTable() {
         TableView<Post> table = new TableView<>();
         TableColumn<Post, Integer> idCol = new TableColumn<>("PostID");
-        idCol.setCellValueFactory(new PropertyValueFactory("postID"));
+        idCol.setCellValueFactory(new PropertyValueFactory("post_id"));
         TableColumn<Post, String> titleCol = new TableColumn<>("Title");
         titleCol.setCellValueFactory(new PropertyValueFactory("title"));
         TableColumn<Post, String> contentCol = new TableColumn<>("Content");
         contentCol.setCellValueFactory(new PropertyValueFactory("content"));
         TableColumn<Post, Integer> auCol = new TableColumn<>("Author");
-        auCol.setCellValueFactory(new PropertyValueFactory("authorName"));
+        auCol.setCellValueFactory(new PropertyValueFactory("author_name"));
         TableColumn<Post, Integer> timeCol = new TableColumn<>("Post Time");
-        timeCol.setCellValueFactory(new PropertyValueFactory("postingTime"));
+        timeCol.setCellValueFactory(new PropertyValueFactory("posting_time"));
 
         table.getColumns().addAll(idCol, titleCol, contentCol, auCol, timeCol);
 //        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -91,11 +75,11 @@ public class Tables {
                     break;
                 }
                 Post p = new Post();
-                p.setPostID(posts.get(i).getPostID());
+                p.setPost_id(posts.get(i).getPost_id());
                 p.setTitle(posts.get(i).getTitle());
                 p.setContent(posts.get(i).getContent());
-                p.setAuthorName(posts.get(i).getAuthorName());
-                p.setPostingTime(posts.get(i).getPostingTime());
+                p.setAuthor_name(posts.get(i).getAuthor_name());
+                p.setPosting_time(posts.get(i).getPosting_time());
                 postData.add(p);
             }
 
@@ -123,15 +107,15 @@ public class Tables {
                 }
                 Post p = new Post();
 
-                p.setPostID(posts.get(i).getPostID());
+                p.setPost_id(posts.get(i).getPost_id());
                 p.setTitle(posts.get(i).getTitle());
                 p.setContent(posts.get(i).getContent());
                 if (posts.get(i).isUnKnown()) {
-                    p.setAuthorName("Unknown");
+                    p.setAuthor_name("Unknown");
                 } else {
-                    p.setAuthorName(posts.get(i).getAuthorName());
+                    p.setAuthor_name(posts.get(i).getAuthor_name());
                 }
-                p.setPostingTime(posts.get(i).getPostingTime());
+                p.setPosting_time(posts.get(i).getPosting_time());
                 postData.add(p);
             }
         } catch (Exception ex) {
@@ -144,7 +128,7 @@ public class Tables {
     public static TableView<Post> createTable_react() {
         TableView<Post> table = new TableView<>();
         TableColumn<Post, Integer> auCol = new TableColumn<>("Author");
-        auCol.setCellValueFactory(new PropertyValueFactory("authorName"));
+        auCol.setCellValueFactory(new PropertyValueFactory("author_name"));
         auCol.setPrefWidth(180);
         table.getColumns().addAll(auCol);
 //        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -184,7 +168,7 @@ public class Tables {
                     break;
                 }
                 Post p = new Post();
-                p.setAuthorName(posts.get(i).getAuthorName());
+                p.setAuthor_name(posts.get(i).getAuthor_name());
                 postData.add(p);
             }
         } catch (Exception ex) {
@@ -198,15 +182,15 @@ public class Tables {
     public static TableView<Replies> createTable_reply() {
         TableView<Replies> table = new TableView<>();
         TableColumn<Replies, Integer> re_idCol = new TableColumn<>("Reply ID");
-        re_idCol.setCellValueFactory(new PropertyValueFactory("replyID"));
+        re_idCol.setCellValueFactory(new PropertyValueFactory("reply_id"));
         TableColumn<Replies, Integer> postId = new TableColumn<>("Post ID");
-        postId.setCellValueFactory(new PropertyValueFactory("postID"));
+        postId.setCellValueFactory(new PropertyValueFactory("post_id"));
         TableColumn<Replies, String> re_conCol = new TableColumn<>("Content");
-        re_conCol.setCellValueFactory(new PropertyValueFactory("replyContent"));
+        re_conCol.setCellValueFactory(new PropertyValueFactory("reply_content"));
         TableColumn<Replies, Integer> starCol = new TableColumn<>("Reply stars");
-        starCol.setCellValueFactory(new PropertyValueFactory("replyStars"));
+        starCol.setCellValueFactory(new PropertyValueFactory("reply_stars"));
         TableColumn<Replies, String> replyAuthor = new TableColumn<>("Reply Author");
-        replyAuthor.setCellValueFactory(new PropertyValueFactory("replyAuthor"));
+        replyAuthor.setCellValueFactory(new PropertyValueFactory("reply_author"));
 
         table.getColumns().addAll(re_idCol, postId, re_conCol, starCol, replyAuthor);
 //        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -231,11 +215,11 @@ public class Tables {
                 }
                 Replies r = new Replies();
 
-                r.setPostID(replies.get(i).getPostID());
-                r.setReplyID(replies.get(i).getReplyID());
-                r.setReplyContent(replies.get(i).getReplyContent());
-                r.setReplyStars(replies.get(i).getReplyStars());
-                r.setReplyAuthor(replies.get(i).getReplyAuthor());
+                r.setPost_id(replies.get(i).getPost_id());
+                r.setReply_id(replies.get(i).getReply_id());
+                r.setReply_content(replies.get(i).getReply_content());
+                r.setReply_stars(replies.get(i).getReply_stars());
+                r.setReply_author(replies.get(i).getReply_author());
                 postData.add(r);
             }
         } catch (Exception ex) {
@@ -260,12 +244,12 @@ public class Tables {
             TableRow<Replies> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && (!row.isEmpty())) {
-                    int r_id = sw.getSelectionModel().getSelectedItems().get(0).getReplyID();
-//                    try {
-//                        replyDetail(r_id,postId, socket, oos, iis);
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
+                    int r_id = sw.getSelectionModel().getSelectedItems().get(0).getReply_id();
+                    try {
+                        window1.replyDetail(r_id, socket, oos, iis);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             });
             return row;
@@ -273,104 +257,65 @@ public class Tables {
         return replyTable;
     }
 
-//    public static void replyDetail(int replyId, int post_id,Socket socket, ObjectOutputStream oos, ObjectInputStream iis) throws IOException {
-//        Stage stage = new Stage();
-//
-//        FileInputStream input = new FileInputStream("./reply6_6.jpeg");
-//        javafx.scene.image.Image image = new Image(input);
-//        ImageView imageView = new ImageView(image);
-//        VBox vBox = new VBox();
-//        HBox react = new HBox(20);
-//        HBox seeReacts = new HBox(20);
-//        HBox message = new HBox(20);
-//
-//        react.setLayoutY(400);
-//        seeReacts.setLayoutY(440);
-//        message.setLayoutY(480);
-//        message.setLayoutX(80);
-//        Group group = new Group(imageView, vBox, react, seeReacts, message);
-//
-//
-//        try {
-//            Command command = new Command("getPostReply", new String[]{post_id + ""});
-//            oos.writeObject(command);
-//            oos.flush();
-//
-//            // 接收查询结果
-//            Response response = (Response) iis.readObject();
-//            String reply_json = response.responseContent;
-//            List<Replies> reply = JSON.parseArray(reply_json, Replies.class);
-//            if (reply.size() != 0) {
-//                Replies r = reply.get(0);
-//                Text id = new Text("id: " + r.getReplyID() + "");
-//                id.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
-//
-////                Text title = new Text(r.g() + "\n");
-////                title.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.NORMAL, 20));
-////                title.setWrappingWidth(600);
-////                title.setTextAlignment(TextAlignment.CENTER);
-////                title.setUnderline(true);
-//
-//                Text content = new Text("    " + r.getReplyContent() + "\n");
-//                content.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.NORMAL, 18));
-//                content.setFill(Paint.valueOf("#00008B"));
-//                content.setWrappingWidth(600);
-//                content.setLayoutX(30);
-//                content.setTextAlignment(TextAlignment.CENTER);
-//                Text au = new Text(r.getReplyAuthor());
-//                au.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 18));
-//
-////                Text time = new Text(r.g() + "");
-////                time.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
-//                vBox.getChildren().addAll(id, au, content,);
-//
-//                javafx.scene.control.Button reply_rec = new javafx.scene.control.Button("Reply this reply");
-////                javafx.scene.control.Button share = new javafx.scene.control.Button("Share");
-////                javafx.scene.control.Button favorite = new javafx.scene.control.Button("Favorite");
-////                javafx.scene.control.Button seeLikes = new javafx.scene.control.Button("See Likes");
-////                javafx.scene.control.Button seeShares = new javafx.scene.control.Button("See Shares");
-////                javafx.scene.control.Button seeFavorites = new javafx.scene.control.Button("See Favorites");
-//                javafx.scene.control.Button follow_au = new javafx.scene.control.Button("Follow the author");
-//                javafx.scene.control.Button reply = new javafx.scene.control.Button("Reply");
-//                javafx.scene.control.Button seeReply = new javafx.scene.control.Button("See Replies");
-//
-//                like.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
-//
-//                setBtn_tp(like, "cadetblue", 20);
-//                setBtn_tp(share, "cadetblue", 20);
-//                setBtn_tp(favorite, "cadetblue", 20);
-//                setBtn_tp(seeLikes, "cadetblue", 20);
-//                setBtn_tp(seeShares, "cadetblue", 20);
-//                setBtn_tp(seeFavorites, "cadetblue", 20);
-//                setBtn_tp(follow_au, "cadetblue", 20);
-//                setBtn_tp(reply, "cadetblue", 20);
-//                setBtn_tp(seeReply, "cadetblue", 20);
-//
-//                javafx.scene.control.Label label_mess = new Label("--");
-//                label_mess.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 20));
-//
-//                react.getChildren().addAll(like, share, favorite, follow_au, reply);
-//                seeReacts.getChildren().addAll(seeLikes, seeShares, seeFavorites, seeReply);
-//                message.getChildren().addAll(label_mess);
-//                window1.setHandle(like);
-//                like.setOnAction(e ->
-//                        {
-//                            react_with_post(label_mess, like, oos, iis, postId, "likePost", "点赞", "点过赞了");
-//                        }
-//                );
-//
-//            }
-//        } catch (ClassNotFoundException e) {
-//            e.printStackTrace();
-//        }
-//        Scene scene = new Scene(group, 600, 600);
-//        //场景放到舞台中
-//        stage.setScene(scene);
-//        stage.setX(700);//出现在屏幕中的位置
-//        stage.setY(200);
-//        stage.setResizable(false);
-//        stage.show();
-//    }
+
+    public static TableView<Replies> createTable_sec_reply() {
+        TableView<Replies> table = new TableView<>();
+        TableColumn<Replies, Integer> secre_idCol = new TableColumn<>("sec_Reply ID");
+        secre_idCol.setCellValueFactory(new PropertyValueFactory("sec_reply_id"));
+        TableColumn<Replies, String> re_conCol = new TableColumn<>("Content");
+        re_conCol.setCellValueFactory(new PropertyValueFactory("sec_reply_content"));
+        TableColumn<Replies, Integer> starCol = new TableColumn<>("Reply stars");
+        starCol.setCellValueFactory(new PropertyValueFactory("sec_reply_stars"));
+        TableColumn<Replies, String> replyAuthor = new TableColumn<>("Reply Author");
+        replyAuthor.setCellValueFactory(new PropertyValueFactory("sec_reply_author"));
+
+        table.getColumns().addAll(secre_idCol, re_conCol, starCol, replyAuthor);
+//        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        return table;
+    }
+
+    public static List<Replies> getTableData_sec_reply(int from, int to, int replyid, String react_type, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
+        List<Replies> postData = new ArrayList<>();
+        try {
+            Command command = new Command(react_type, new String[]{replyid + ""});
+            oos.writeObject(command);
+            oos.flush();
+
+            // 接收查询结果
+            Response response = (Response) iis.readObject();
+            String replies_json = response.responseContent;
+            List<Replies> replies = JSON.parseArray(replies_json, Replies.class);
+            replyCnt = replies.size();
+            for (int i = from; i <= to; i++) {
+                if (replyCnt == 0) {
+                    break;
+                }
+                Replies r = new Replies();
+
+                r.setSec_reply_id(replies.get(i).getSec_reply_id());
+                r.setSec_reply_content(replies.get(i).getSec_reply_content());
+                r.setSec_reply_stars(replies.get(i).getSec_reply_stars());
+                r.setSec_reply_author(replies.get(i).getSec_reply_author());
+                postData.add(r);
+            }
+        } catch (Exception ex) {
+            String message = ex.getMessage();
+            System.out.println(message);
+        }
+        return postData;
+    }
+
+    public static TableView<Replies> createPage_sec_reply(int pageIndex, int pageSize, String reactType, int postId, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
+        int page = pageIndex * pageSize;
+        TableView<Replies> replyTable = createTable_sec_reply();
+        List<Replies> replyList = getTableData_sec_reply(page, page + pageSize, postId, reactType, socket, oos, iis);
+        replyTable.setItems(FXCollections.observableList(replyList));
+
+        replyTable.setPrefHeight(350);
+        replyTable.setPrefWidth(600);
+        TableView<Replies> sw = replyTable;
+        return replyTable;
+    }
 
 
     public static List<Author_foll> getTableData_foll(int from, int to, Label mess, String react_type, ObjectOutputStream oos, ObjectInputStream iis) throws Exception {
@@ -416,7 +361,7 @@ public class Tables {
         return table;
     }
 
-    public static TableView<Author_foll> createPage_Follow(int pageIndex, int pageSize, Label mess, String react_type, ObjectOutputStream oos, ObjectInputStream iis) throws Exception {
+    public static TableView<Author_foll> createPage_Follow(int pageIndex, int pageSize,Pagination pagination_like, Label mess, String react_type, ObjectOutputStream oos, ObjectInputStream iis) throws Exception {
         int page = pageIndex * pageSize;
         TableView<Author_foll> postTable = createTable_Foll_author();
 
@@ -434,7 +379,7 @@ public class Tables {
                     String authorName = sw.getSelectionModel().getSelectedItems().get(0).getFollowedAuthorName();
                     try {
 //                        window1.postDetail(p_id, socket, oos, iis);
-                        window1.unfoll_author(authorName, mess, oos, iis);
+                        window1.unfoll_author(authorName, mess,pagination_like, oos, iis);
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     }
@@ -461,11 +406,11 @@ public class Tables {
                     break;
                 }
                 Post p = new Post();
-                p.setPostID(posts.get(i).getPostID());
+                p.setPost_id(posts.get(i).getPost_id());
                 p.setTitle(posts.get(i).getTitle());
                 p.setContent(posts.get(i).getContent());
-                p.setAuthorName(posts.get(i).getAuthorName());
-                p.setPostingTime(posts.get(i).getPostingTime());
+                p.setAuthor_name(posts.get(i).getAuthor_name());
+                p.setPosting_time(posts.get(i).getPosting_time());
                 postData.add(p);
             }
         } catch (Exception ex) {
@@ -490,7 +435,7 @@ public class Tables {
             TableRow<Post> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && (!row.isEmpty())) {
-                    int p_id = sw.getSelectionModel().getSelectedItems().get(0).getPostID();
+                    int p_id = sw.getSelectionModel().getSelectedItems().get(0).getPost_id();
                     try {
                         window1.postDetail(p_id, socket, oos, iis);
                     } catch (FileNotFoundException e) {
@@ -506,15 +451,15 @@ public class Tables {
     public static TableView<Post> createTable_my_reactions() {
         TableView<Post> table = new TableView<>();
         TableColumn<Post, Integer> idCol = new TableColumn<>("PostID");
-        idCol.setCellValueFactory(new PropertyValueFactory("postID"));
+        idCol.setCellValueFactory(new PropertyValueFactory("post_id"));
         TableColumn<Post, String> titleCol = new TableColumn<>("Title");
         titleCol.setCellValueFactory(new PropertyValueFactory("title"));
         TableColumn<Post, String> contentCol = new TableColumn<>("Content");
         contentCol.setCellValueFactory(new PropertyValueFactory("content"));
         TableColumn<Post, Integer> auCol = new TableColumn<>("Author");
-        auCol.setCellValueFactory(new PropertyValueFactory("authorName"));
+        auCol.setCellValueFactory(new PropertyValueFactory("author_name"));
         TableColumn<Post, Integer> timeCol = new TableColumn<>("Post Time");
-        timeCol.setCellValueFactory(new PropertyValueFactory("postingTime"));
+        timeCol.setCellValueFactory(new PropertyValueFactory("posting_time"));
 
         table.getColumns().addAll(idCol, titleCol, contentCol, auCol, timeCol);
 //        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -524,13 +469,13 @@ public class Tables {
     public static TableView<Replies> createTable_my_reply() {
         TableView<Replies> table = new TableView<>();
         TableColumn<Replies, Integer> re_idCol = new TableColumn<>("Reply ID");
-        re_idCol.setCellValueFactory(new PropertyValueFactory("replyID"));
+        re_idCol.setCellValueFactory(new PropertyValueFactory("reply_id"));
         TableColumn<Replies, Integer> postId = new TableColumn<>("Post ID");
-        postId.setCellValueFactory(new PropertyValueFactory("postID"));
+        postId.setCellValueFactory(new PropertyValueFactory("post_id"));
         TableColumn<Replies, String> re_conCol = new TableColumn<>("Content");
-        re_conCol.setCellValueFactory(new PropertyValueFactory("replyContent"));
+        re_conCol.setCellValueFactory(new PropertyValueFactory("reply_content"));
         TableColumn<Replies, Integer> starCol = new TableColumn<>("Reply stars");
-        starCol.setCellValueFactory(new PropertyValueFactory("replyStars"));
+        starCol.setCellValueFactory(new PropertyValueFactory("reply_stars"));
         TableColumn<Replies, String> post_content = new TableColumn<>("Post content");
         post_content.setCellValueFactory(new PropertyValueFactory("content"));
 
@@ -556,10 +501,10 @@ public class Tables {
                     break;
                 }
                 Replies r = new Replies();
-                r.setPostID(replies.get(i).getPostID());
-                r.setReplyID(replies.get(i).getReplyID());
-                r.setReplyContent(replies.get(i).getReplyContent());
-                r.setReplyStars(replies.get(i).getReplyStars());
+                r.setPost_id(replies.get(i).getPost_id());
+                r.setReply_id(replies.get(i).getReply_id());
+                r.setReply_content(replies.get(i).getReply_content());
+                r.setReply_stars(replies.get(i).getReply_stars());
                 r.setContent(replies.get(i).getContent());
                 postData.add(r);
             }
@@ -585,7 +530,7 @@ public class Tables {
             TableRow<Replies> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && (!row.isEmpty())) {
-                    int r_id = sw.getSelectionModel().getSelectedItems().get(0).getReplyID();
+                    int r_id = sw.getSelectionModel().getSelectedItems().get(0).getReply_id();
 //                    try {
 //                        replyDetail(r_id,postId, socket, oos, iis);
 //                    } catch (IOException e) {

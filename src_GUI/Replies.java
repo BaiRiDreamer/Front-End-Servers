@@ -1,62 +1,71 @@
 public class Replies {
-    private int postID;
-    private int replyID;
-    private String replyContent;
-    private int replyStars;
-    private String replyAuthor;
-    private String secondaryReplyContent;
-    private int secondaryReplyStars;
-    private String secondaryReplyAuthor;
-    private String content;
+    public int post_id;
+    public int reply_id;
+    public String reply_content;
+    public int reply_stars;
+    public String reply_author;
+    public String sec_reply_content;
+    public int sec_reply_stars;
+    public String sec_reply_author;
+    public String content;
+    public int sec_reply_id;
+
+    public int getSec_reply_id() {
+        return sec_reply_id;
+    }
+
+    public void setSec_reply_id(int sec_reply_id) {
+        this.sec_reply_id = sec_reply_id;
+    }
 
     public Replies() {
     }
 
-    public Replies(int postID, int replyID, String replyContent, int replyStars, String replyAuthor, String secondaryReplyContent, int secondaryReplyStars, String secondaryReplyAuthor) {
-        this.postID = postID;
-        this.replyID = replyID;
-        this.replyContent = replyContent;
-        this.replyStars = replyStars;
-        this.replyAuthor = replyAuthor;
-        this.secondaryReplyContent = secondaryReplyContent;
-        this.secondaryReplyStars = secondaryReplyStars;
-        this.secondaryReplyAuthor = secondaryReplyAuthor;
+    public Replies(int post_id, int reply_id, String reply_content, int reply_stars, String reply_author, String sec_reply_content, int sec_reply_stars, String sec_reply_author) {
+        this.post_id = post_id;
+        this.reply_id = reply_id;
+        this.reply_content = reply_content;
+        this.reply_stars = reply_stars;
+        this.reply_author = reply_author;
+        this.sec_reply_content = sec_reply_content;
+        this.sec_reply_stars = sec_reply_stars;
+        this.sec_reply_author = sec_reply_author;
     }
 
-    public int getPostID() {
-        return postID;
+    public int getPost_id() {
+        return post_id;
     }
 
-    public void setPostID(int postID) {
-        this.postID = postID;
+    public void setPost_id(int post_id) {
+        this.post_id = post_id;
     }
 
-    public int getReplyID() {
-        return replyID;
+    public int getReply_id() {
+        return reply_id;
     }
 
-    public void setReplyID(int replyID) {
-        this.replyID = replyID;
+    public void setReply_id(int reply_id) {
+        this.reply_id = reply_id;
     }
 
-    public String getReplyContent() {
-        return replyContent;
+    public String getReply_content() {
+        return reply_content;
     }
 
-    public void setReplyContent(String replyContent) {
-        this.replyContent = replyContent;
+    public void setReply_content(String reply_content) {
+        this.reply_content = reply_content;
     }
 
-    public int getReplyStars() {
-        return replyStars;
+    public int getReply_stars() {
+        return reply_stars;
     }
 
-    public void setReplyStars(int replyStars) {
-        this.replyStars = replyStars;
+    public void setReply_stars(int reply_stars) {
+        this.reply_stars = reply_stars;
     }
 
-    public String getReplyAuthor() {
-        return replyAuthor;
+    public String getReply_author() {
+        return reply_author;
     }
 
     public String getContent() {
@@ -65,45 +74,45 @@ public class Replies {
     public void setContent(String content) {
         this.content = content;
     }
-    public void setReplyAuthor(String replyAuthor) {
-        this.replyAuthor = replyAuthor;
+    public void setReply_author(String reply_author) {
+        this.reply_author = reply_author;
     }
 
-    public String getSecondaryReplyContent() {
-        return secondaryReplyContent;
+    public String getSec_reply_content() {
+        return sec_reply_content;
     }
 
-    public void setSecondaryReplyContent(String secondaryReplyContent) {
-        this.secondaryReplyContent = secondaryReplyContent;
+    public void setSec_reply_content(String sec_reply_content) {
+        this.sec_reply_content = sec_reply_content;
     }
 
-    public int getSecondaryReplyStars() {
-        return secondaryReplyStars;
+    public int getSec_reply_stars() {
+        return sec_reply_stars;
     }
 
-    public void setSecondaryReplyStars(int secondaryReplyStars) {
-        this.secondaryReplyStars = secondaryReplyStars;
+    public void setSec_reply_stars(int sec_reply_stars) {
+        this.sec_reply_stars = sec_reply_stars;
     }
 
-    public String getSecondaryReplyAuthor() {
-        return secondaryReplyAuthor;
+    public String getSec_reply_author() {
+        return sec_reply_author;
     }
 
-    public void setSecondaryReplyAuthor(String secondaryReplyAuthor) {
-        this.secondaryReplyAuthor = secondaryReplyAuthor;
+    public void setSec_reply_author(String sec_reply_author) {
+        this.sec_reply_author = sec_reply_author;
     }
 
     @Override
     public String toString() {
         return "Replies{" +
-                "postID=" + postID +
-                ", replyContent='" + replyContent + '\'' +
-                ", replyStars=" + replyStars +
-                ", replyAuthor='" + replyAuthor + '\'' +
-                ", secondaryReplyContent='" + secondaryReplyContent + '\'' +
-                ", secondaryReplyStars=" + secondaryReplyStars +
-                ", secondaryReplyAuthor='" + secondaryReplyAuthor + '\'' +
-                ", replyID=" + replyID + '\'' +
+                "postID=" + post_id +
+                ", replyContent='" + reply_content + '\'' +
+                ", replyStars=" + reply_stars +
+                ", replyAuthor='" + reply_author + '\'' +
+                ", secondaryReplyContent='" + sec_reply_content + '\'' +
+                ", secondaryReplyStars=" + sec_reply_stars +
+                ", secondaryReplyAuthor='" + sec_reply_author + '\'' +
+                ", replyID=" + reply_id + '\'' +
                 '}';
     }
 }

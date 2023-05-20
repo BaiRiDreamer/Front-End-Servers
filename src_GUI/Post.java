@@ -3,67 +3,43 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Post {
-    private int postID;
-    private String title;
-    private List<String> category;
-    private String content;
-    private Timestamp postingTime;
-    private String postingCity;
-    private String authorName;
-    private Timestamp authorRegistrationTime;
-    private String authorID;
-    private String authorPhone;
-    private List<String> authorFollowedBy;
-    private List<String> authorFavorite;
-    private List<String> authorShared;
-    private List<String> authorLiked;
-    private String filename;
-    private Byte[] file;
-    private boolean isUnKnown;
+    public int post_id;
+    public String title;
+    public String content;
+    public Timestamp posting_time;
+    public int posting_city_id;
+    public String author_name;
+    public Timestamp authorRegistrationTime;
+    public String authorID;
+    public String authorPhone;
 
-    public String getFilename() {
-        return filename;
-    }
+    public String filename;
+    public byte[] file;
+    public boolean isUnKnown;
 
-    public void setFilename(String filename) {
-        this.filename = filename;
-    }
-
-    public Byte[] getFile() {
-        return file;
-    }
-
-    public void setFile(Byte[] file) {
-        this.file = file;
-    }
 
     public boolean isUnKnown() {
         return isUnKnown;
     }
 
-    public void setUnKnown(boolean unKnown) {
-        isUnKnown = unKnown;
-    }
-
-
 
     @Override
     public String toString() {
         return "Post{" +
-                "postID=" + postID +
+                "post_id=" + post_id +
                 ", title='" + title + '\'' +
-                ", category=" + category +
+//                ", category=" + category +
                 ", content='" + content + '\'' +
-                ", postingTime='" + postingTime + '\'' +
-                ", postingCity='" + postingCity + '\'' +
-                ", Author='" + authorName + '\'' +
+                ", posting_time='" + posting_time + '\'' +
+                ", posting_city_id='" + posting_city_id + '\'' +
+                ", author_name='" + author_name + '\'' +
                 ", authorRegistrationTime='" + authorRegistrationTime + '\'' +
                 ", authorID='" + authorID + '\'' +
-                ", authorPhone='" + authorPhone + '\'' +
-                ", authorFollowedBy=" + authorFollowedBy +
-                ", authorFavorite=" + authorFavorite +
-                ", authorShared=" + authorShared +
-                ", authorLiked=" + authorLiked +
+                ", authorPhone='" + authorPhone +
+//                ", authorFollowedBy=" + authorFollowedBy +
+//                ", authorFavorite=" + authorFavorite +
+//                ", authorShared=" + authorShared +
+//                ", authorLiked=" + authorLiked +
                 ", filename=" + filename +
                 ", file=" + Arrays.toString(file) +
                 ", isUnknown=" + isUnKnown +
@@ -74,118 +50,51 @@ public class Post {
     /**
      * Getter Part
      */
-    public int getPostID() {
-        return postID;
+    public int getPost_id() {
+        return post_id;
     }
 
     public String getTitle() {
         return title;
     }
 
-    public List<String> getCategory() {
-        return category;
-    }
 
     public String getContent() {
         return content;
     }
 
-    public Timestamp getPostingTime() {
-        return postingTime;
+    public Timestamp getPosting_time() {
+        return posting_time;
     }
 
-    public String getAuthorName() {
-        return authorName;
+    public String getAuthor_name() {
+        return author_name;
     }
 
-    public String getPostingCity() {
-        return postingCity;
-    }
-
-    public Timestamp getAuthorRegistrationTime() {
-        return authorRegistrationTime;
-    }
-
-    public String getAuthorID() {
-        return authorID;
-    }
-
-    public String getAuthorPhone() {
-        return authorPhone;
-    }
-
-    public List<String> getAuthorFollowedBy() {
-        return authorFollowedBy;
-    }
-
-    public List<String> getAuthorFavorite() {
-        return authorFavorite;
-    }
-
-    public List<String> getAuthorShared() {
-        return authorShared;
-    }
-
-    public List<String> getAuthorLiked() {
-        return authorLiked;
-    }
 
     /**
      * Setter Part
      */
-    public void setPostID(int postID) {
-        this.postID = postID;
+    public void setPost_id(int post_id) {
+        this.post_id = post_id;
     }
 
     public void setTitle(String title) {
         this.title = title;
     }
 
-    public void setCategory(List<String> category) {
-        this.category = category;
-    }
 
     public void setContent(String content) {
         this.content = content;
     }
 
-    public void setPostingTime(Timestamp postingTime) {
-        this.postingTime = postingTime;
+    public void setPosting_time(Timestamp posting_time) {
+        this.posting_time = posting_time;
     }
 
-    public void setPostingCity(String postingCity) {
-        this.postingCity = postingCity;
+
+    public void setAuthor_name(String author_name) {
+        this.author_name = author_name;
     }
 
-    public void setAuthorName(String authorName) {
-        this.authorName = authorName;
-    }
-
-    public void setAuthorRegistrationTime(Timestamp authorRegistrationTime) {
-        this.authorRegistrationTime = authorRegistrationTime;
-    }
-
-    public void setAuthorID(String authorID) {
-        this.authorID = authorID;
-    }
-
-    public void setAuthorPhone(String authorPhone) {
-        this.authorPhone = authorPhone;
-    }
-
-    public void setAuthorFollowedBy(List<String> authorFollowedBy) {
-        this.authorFollowedBy = authorFollowedBy;
-    }
-
-    public void setAuthorFavorite(List<String> authorFavorite) {
-        this.authorFavorite = authorFavorite;
-    }
-
-    public void setAuthorShared(List<String> authorShared) {
-        this.authorShared = authorShared;
-    }
-
-    public void setAuthorLiked(List<String> authorLiked) {
-        this.authorLiked = authorLiked;
-    }
 }

@@ -288,20 +288,15 @@ public class window1 extends Application {
 
                 Command command;
                 if (!filel.getText().equals("Choose your File:")) {
-//                    if (niming.getUserData().toString().equals("true")) {
-//                        command = new Command("PublishPost", new String[]{"Unknown", tt.getText(), contt.getText(), country_text.getText(),
-//                                city_text.getText(), filel.getText(), niming.getUserData().toString()}, fileToByte(temp.getText()));
-//                    } else {
-                        command = new Command("PublishPost", new String[]{userName, tt.getText(), contt.getText(), country_text.getText(),
-                                city_text.getText(), filel.getText(), niming.getUserData().toString()}, fileToByte(temp.getText()));
-//                    }
+                    command = new Command("PublishPost", new String[]{userName, tt.getText(), contt.getText(), country_text.getText(),
+                            city_text.getText(), filel.getText(), niming.getUserData().toString()}, fileToByte(temp.getText()));
                 } else {
 //                    if (niming.getUserData().toString().equals("true")) {
 //                        command = new Command("PublishPost", new String[]{"Unknown", tt.getText(), contt.getText(), country_text.getText(),
 //                                city_text.getText(), filel.getText(), niming.getUserData().toString()}, null);
 //                    } else {
-                        command = new Command("PublishPost", new String[]{userName, tt.getText(), contt.getText(), country_text.getText(),
-                                city_text.getText(), null, niming.getUserData().toString()}, null);
+                    command = new Command("PublishPost", new String[]{userName, tt.getText(), contt.getText(), country_text.getText(),
+                            city_text.getText(), null, niming.getUserData().toString()}, null);
 //                    }
                 }
                 oos.writeObject(command);
@@ -361,7 +356,7 @@ public class window1 extends Application {
             TableRow<Post> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && (!row.isEmpty())) {
-                    int p_id = sw.getSelectionModel().getSelectedItems().get(0).getPostID();
+                    int p_id = sw.getSelectionModel().getSelectedItems().get(0).getPost_id();
                     try {
                         postDetail(p_id, socket, oos, iis);
                     } catch (FileNotFoundException e) {
@@ -408,7 +403,7 @@ public class window1 extends Application {
 
         Pagination pagination = null;
         try {
-            pagination = new Pagination(calMyPostCnt() / 9 + 1, 0);
+            pagination = new Pagination(calMyPostCnt(socket, oos, iis) / 9 + 1, 0);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -422,7 +417,7 @@ public class window1 extends Application {
                 if (st[new_value.intValue()].equals("My posts")) {
                     Pagination pagination = null;
                     try {
-                        pagination = new Pagination(calMyPostCnt() / 9 + 1, 0);
+                        pagination = new Pagination(calMyPostCnt(socket, oos, iis) / 9 + 1, 0);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
@@ -439,7 +434,7 @@ public class window1 extends Application {
                     Pagination pagination_like = new Pagination(5, 0);
                     pagination_like.setPageFactory(pageIndex -> {
                         try {
-                            return Tables.createPage_Follow(pageIndex, 10, mess, "getUserFollowBy", oos, iis);
+                            return Tables.createPage_Follow(pageIndex, 10, pagination_like, mess, "getUserFollowBy", oos, iis);
                         } catch (Exception e) {
                             e.printStackTrace();
                             return null;
@@ -539,9 +534,6 @@ public class window1 extends Application {
 
         // 接收查询结果
         Response response = (Response) iis.readObject();
-        //System.out.println(response.toString());
-
-        // ResultSet resultSet = apiSpecification.getAllPost();
         if (Objects.equals(response.responseType, "true"))
             return Integer.parseInt(response.responseContent);
         else {
@@ -549,15 +541,19 @@ public class window1 extends Application {
         }
     }
 
-    public static int calMyPostCnt() throws Exception {
-//        ResultSet resultSet = apiSpecification.getPublishedPost(userName);
-//        if (resultSet == null) {
-//            return 0;
-//        }
-//        resultSet.last();
-//        int mypostCnt = resultSet.getRow();
-//        resultSet.beforeFirst();
-        return 1;
+    public static int calMyPostCnt(Socket socket, ObjectOutputStream oos, ObjectInputStream iis) throws Exception {
+        Command command = new Command("getUserPostCnt", new String[]{userName});
+//        ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+        oos.writeObject(command);
+        oos.flush();
+
+        // 接收查询结果
+        Response response = (Response) iis.readObject();
+        if (Objects.equals(response.responseType, "true"))
+            return Integer.parseInt(response.responseContent);
+        else {
+            return -1;
+        }
     }
 
 
@@ -608,6 +604,7 @@ public class window1 extends Application {
 
     public static void see_replies(ObjectOutputStream oos, ObjectInputStream iis, int postId, String reactType, Socket socket) {
         Stage smallStage = new Stage();
+        smallStage.setTitle("Post Replies");
 
         Pagination pagination_like = new Pagination(Tables.replyCnt / 24 + 1, 0);
         pagination_like.setPageFactory(pageIndex -> Tables.createPage_reply(pageIndex, 25, reactType, postId, socket, oos, iis));
@@ -648,17 +645,18 @@ public class window1 extends Application {
             return null;
         }
         Post p = new Post();
-        p.setPostID(posts.get(0).getPostID());
+        p.setPost_id(posts.get(0).getPost_id());
         p.setTitle(posts.get(0).getTitle());
         p.setContent(posts.get(0).getContent());
-        p.setAuthorName(posts.get(0).getAuthorName());
-        p.setPostingTime(posts.get(0).getPostingTime());
+        p.setAuthor_name(posts.get(0).getAuthor_name());
+        p.setPosting_time(posts.get(0).getPosting_time());
         return p;
     }
 
 
     public static void postDetail(int postId, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) throws FileNotFoundException {
         Stage stage = new Stage();
+        stage.setTitle("Post Details");
 
         FileInputStream input = new FileInputStream("./post_pic.jpeg");
         Image image = new Image(input);
@@ -687,7 +685,7 @@ public class window1 extends Application {
             List<Post> posts = JSON.parseArray(post_json, Post.class);
             if (posts.size() != 0) {
                 Post p = posts.get(0);
-                Text id = new Text("id: " + p.getPostID() + "");
+                Text id = new Text("id: " + p.getPost_id() + "");
                 id.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
 
                 Text title = new Text(p.getTitle() + "\n");
@@ -702,12 +700,9 @@ public class window1 extends Application {
                 content.setWrappingWidth(600);
                 content.setLayoutX(30);
                 content.setTextAlignment(TextAlignment.CENTER);
-                Text au = new Text(p.getAuthorName());
-                au.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 18));
 
-                Text time = new Text(p.getPostingTime() + "");
+                Text time = new Text(p.getPosting_time() + "");
                 time.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
-                vBox.getChildren().addAll(id, au, title, content, time);
 
                 Button like = new Button("Like");
                 Button share = new Button("Share");
@@ -721,6 +716,17 @@ public class window1 extends Application {
                 Button sendReply = new Button("Send Reply");
 
                 like.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
+
+                Text au = new Text();
+                if (p.isUnKnown()) {
+                    au = new Text("UnKnown");
+                    follow_au.setDisable(true);
+                } else {
+                    au = new Text(p.getAuthor_name());
+                }
+                au.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 18));
+                vBox.getChildren().addAll(id, au, title, content, time);
+
 
                 setBtn_tp(like, "cadetblue", 20);
                 setBtn_tp(share, "cadetblue", 20);
@@ -785,7 +791,7 @@ public class window1 extends Application {
                         {
                             Command command1 = null;
                             try {
-                                command1 = new Command("followUser", new String[]{userName, getIthPost(postId, oos, iis).getAuthorName()});
+                                command1 = new Command("followUser", new String[]{userName, getIthPost(postId, oos, iis).getAuthor_name()});
                             } catch (IOException | ClassNotFoundException ex) {
                                 ex.printStackTrace();
                             }
@@ -818,7 +824,7 @@ public class window1 extends Application {
                                 label_mess.setText("回复不能为空");
                             } else {
                                 Command command1 = null;
-                                command1 = new Command("replyPost", new String[]{postId + "", userName, reply});
+                                command1 = new Command("replyPost", new String[]{postId + "", reply, userName});
                                 try {
                                     oos.writeObject(command1);
                                     oos.flush();
@@ -863,7 +869,112 @@ public class window1 extends Application {
 
     }
 
-    public static void unfoll_author(String authorname, Label mess, ObjectOutputStream oos, ObjectInputStream iis) throws FileNotFoundException {
+
+    public static void replyDetail(int replyId, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) throws IOException {
+        Stage stage = new Stage();
+        stage.setTitle("Reply Details");
+        FileInputStream input = new FileInputStream("./reply6_6.jpeg");
+        javafx.scene.image.Image image = new Image(input);
+        ImageView imageView = new ImageView(image);
+        VBox vBox = new VBox();
+        HBox react = new HBox(20);
+        HBox message = new HBox(20);
+        react.setLayoutY(520);
+
+        message.setLayoutY(560);
+        message.setLayoutX(80);
+        Group group = new Group(imageView, vBox, react, message);
+
+
+        try {
+            Command command = new Command("getIthreply", new String[]{replyId + ""});
+            oos.writeObject(command);
+            oos.flush();
+
+            // 接收查询结果
+            Response response = (Response) iis.readObject();
+            String reply_json = response.responseContent;
+            List<Replies> reply = JSON.parseArray(reply_json, Replies.class);
+            if (reply.size() != 0) {
+                Replies r = reply.get(0);
+                Text id = new Text("id: " + replyId);
+                id.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
+
+                Text content = new Text("    " + r.getReply_content() + "\n");
+                content.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.NORMAL, 18));
+                content.setFill(Paint.valueOf("#00008B"));
+                content.setWrappingWidth(600);
+                content.setLayoutX(30);
+                content.setTextAlignment(TextAlignment.CENTER);
+                Text au = new Text(r.getReply_author() + ":");
+                au.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 18));
+
+
+                Label label_mess = new Label("--");
+                label_mess.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 20));
+
+
+                TextField reply_reply_t = new TextField();
+                reply_reply_t.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
+                reply_reply_t.setPromptText("Reply this Reply...");
+
+                Button send_secReply = new Button("Send Reply to this reply");
+                setBtn_tp(send_secReply, "blue", 15);
+                react.getChildren().addAll(reply_reply_t, send_secReply);
+                message.getChildren().addAll(label_mess);
+
+                Pagination pagination_like = new Pagination(Tables.replyCnt / 14 + 1, 0);
+                pagination_like.setPageFactory(pageIndex -> Tables.createPage_sec_reply(pageIndex, 15, "getReplySecreply", replyId, socket, oos, iis));
+                pagination_like.setLayoutY(200);
+                Group group_r1 = new Group(pagination_like);
+                vBox.getChildren().addAll(id, au, content, group_r1);
+
+                setHandle(send_secReply);
+                send_secReply.setOnAction(e ->
+                        {
+                            if (reply_reply_t.getText().equals("")) {
+                                label_mess.setText("回复不能为空");
+                            } else {
+                                Command command1 = null;
+                                command1 = new Command("replySecReply", new String[]{replyId + "", reply_reply_t.getText(), userName});
+                                try {
+                                    oos.writeObject(command1);
+                                    oos.flush();
+                                } catch (IOException ex) {
+                                    ex.printStackTrace();
+                                }
+                                // 接收查询结果
+                                try {
+                                    Response response1 = (Response) iis.readObject();
+                                    if (response1.responseType.equals("true")) {
+                                        label_mess.setText("回复成功!");
+                                        pagination_like.setPageFactory(pageIndex -> Tables.createPage_sec_reply(pageIndex, 15, "getReplySecreply", replyId, socket, oos, iis));
+                                    } else {
+                                        label_mess.setText("回复失败");
+                                    }
+                                } catch (IOException | ClassNotFoundException ex) {
+                                    ex.printStackTrace();
+                                    label_mess.setText("回复失败");
+                                }
+                            }
+                        }
+                );
+
+
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        Scene scene = new Scene(group, 600, 600);
+        //场景放到舞台中
+        stage.setScene(scene);
+        stage.setX(700);//出现在屏幕中的位置
+        stage.setY(200);
+        stage.setResizable(false);
+        stage.show();
+    }
+
+    public static void unfoll_author(String authorname, Label mess, Pagination pagination_like, ObjectOutputStream oos, ObjectInputStream iis) throws FileNotFoundException {
         Stage stage1 = new Stage();
         Button unfoll = new Button("取消关注");
         VBox vBox = new VBox();
@@ -881,9 +992,18 @@ public class window1 extends Application {
                 Response response = (Response) iis.readObject();
                 if (response.responseType.equals("true")) {
                     mess.setText("取消关注成功!");
+                    pagination_like.setPageFactory(pageIndex -> {
+                        try {
+                            return Tables.createPage_Follow(pageIndex, 10,pagination_like, mess, "getUserFollowBy", oos, iis);
+                        } catch (Exception e1) {
+                            e1.printStackTrace();
+                            return null;
+                        }
+                    });
                     stage1.close();
                 } else {
                     mess.setText("您还未关注过该作者");
+                    stage1.close();
                 }
             } catch (Exception ex) {
                 String messagew = ex.getMessage();
@@ -891,12 +1011,12 @@ public class window1 extends Application {
             }
         });
 
-
+        Point pp = MouseInfo.getPointerInfo().getLocation();
         Scene scene = new Scene(group, 200, 100);
         //场景放到舞台中
         stage1.setScene(scene);
-        stage1.setX(700);//出现在屏幕中的位置
-        stage1.setY(200);
+        stage1.setX(pp.getX());//出现在屏幕中的位置
+        stage1.setY(pp.getY());
         stage1.setResizable(false);
         stage1.show();
 
