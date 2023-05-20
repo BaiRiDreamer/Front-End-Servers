@@ -122,10 +122,15 @@ public class Tables {
                     break;
                 }
                 Post p = new Post();
+
                 p.setPostID(posts.get(i).getPostID());
                 p.setTitle(posts.get(i).getTitle());
                 p.setContent(posts.get(i).getContent());
-                p.setAuthorName(posts.get(i).getAuthorName());
+                if (posts.get(i).isUnKnown()) {
+                    p.setAuthorName("Unknown");
+                } else {
+                    p.setAuthorName(posts.get(i).getAuthorName());
+                }
                 p.setPostingTime(posts.get(i).getPostingTime());
                 postData.add(p);
             }
@@ -440,7 +445,7 @@ public class Tables {
         return postTable;
     }
 
-    public static List<Post> getTableData_my_reactions(int from, int to,String reactType, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
+    public static List<Post> getTableData_my_reactions(int from, int to, String reactType, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
         List<Post> postData = new ArrayList<>();
         try {
             Command command = new Command(reactType, new String[]{window1.userName});
@@ -470,10 +475,10 @@ public class Tables {
         return postData;
     }
 
-    public static TableView<Post> createPage_my_reactions(int pageIndex, int pageSize,String reactType, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
+    public static TableView<Post> createPage_my_reactions(int pageIndex, int pageSize, String reactType, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
         int page = pageIndex * pageSize;
         TableView<Post> postTable = createTable_my_reactions();
-        List<Post> postList = getTableData_my_reactions(page, page + pageSize,reactType, socket, oos, iis);
+        List<Post> postList = getTableData_my_reactions(page, page + pageSize, reactType, socket, oos, iis);
         postTable.setItems(FXCollections.observableList(postList));
 
         postTable.setPrefHeight(350);
@@ -529,12 +534,12 @@ public class Tables {
         TableColumn<Replies, String> post_content = new TableColumn<>("Post content");
         post_content.setCellValueFactory(new PropertyValueFactory("content"));
 
-        table.getColumns().addAll(re_idCol, postId, re_conCol,  post_content,starCol);
+        table.getColumns().addAll(re_idCol, postId, re_conCol, post_content, starCol);
 //        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         return table;
     }
 
-    public static List<Replies> getTableData_my_reply(int from, int to,String react_type, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
+    public static List<Replies> getTableData_my_reply(int from, int to, String react_type, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
         List<Replies> postData = new ArrayList<>();
         try {
             Command command = new Command(react_type, new String[]{window1.userName});

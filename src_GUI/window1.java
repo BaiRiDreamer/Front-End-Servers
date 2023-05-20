@@ -3,8 +3,6 @@ import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -17,7 +15,6 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -34,8 +31,6 @@ import javafx.stage.Stage;
 import java.awt.*;
 import java.io.*;
 import java.net.Socket;
-import java.sql.ResultSet;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -110,16 +105,6 @@ public class window1 extends Application {
 
             stage.show();
 
-
-            // 发送查询请求
-//            Command command = new Command("isUserValid", new String[]{"1", "2"});
-//            ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-//            oos.writeObject(command);
-//            oos.flush();
-
-            // 接收查询结果
-//            Response response = (Response) new ObjectInputStream(socket.getInputStream()).readObject();
-//            System.out.println(response.toString());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -298,15 +283,26 @@ public class window1 extends Application {
         Stage stage = new Stage();
         button.setOnAction(e -> {
             try {
-//                System.out.println(niming.getUserData().toString());
+                implementMethod.isContentValid(tt.getText(), contt.getText());
+                implementMethod.isCityInfoValid(country_text.getText(), city_text.getText());
+
                 Command command;
                 if (!filel.getText().equals("Choose your File:")) {
-                    command = new Command("PublishPost", new String[]{userName, tt.getText(), contt.getText(), country_text.getText(),
-                            city_text.getText(), filel.getText(), niming.getUserData().toString()}, fileToByte(temp.getText()));
+//                    if (niming.getUserData().toString().equals("true")) {
+//                        command = new Command("PublishPost", new String[]{"Unknown", tt.getText(), contt.getText(), country_text.getText(),
+//                                city_text.getText(), filel.getText(), niming.getUserData().toString()}, fileToByte(temp.getText()));
+//                    } else {
+                        command = new Command("PublishPost", new String[]{userName, tt.getText(), contt.getText(), country_text.getText(),
+                                city_text.getText(), filel.getText(), niming.getUserData().toString()}, fileToByte(temp.getText()));
+//                    }
                 } else {
-                    command = new Command("PublishPost", new String[]{userName, tt.getText(), contt.getText(), country_text.getText(),
-                            city_text.getText(), null, niming.getUserData().toString()}, null);
-
+//                    if (niming.getUserData().toString().equals("true")) {
+//                        command = new Command("PublishPost", new String[]{"Unknown", tt.getText(), contt.getText(), country_text.getText(),
+//                                city_text.getText(), filel.getText(), niming.getUserData().toString()}, null);
+//                    } else {
+                        command = new Command("PublishPost", new String[]{userName, tt.getText(), contt.getText(), country_text.getText(),
+                                city_text.getText(), null, niming.getUserData().toString()}, null);
+//                    }
                 }
                 oos.writeObject(command);
                 oos.flush();
@@ -932,6 +928,9 @@ public class window1 extends Application {
         Button button = new Button("注册");
         buttonStyle(button);
 
+        Button button_back = new Button("<--登录");
+        setBtn_tp(button_back, "cadetblue", 20);
+
         Label user = new Label("User name:");
         user.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 20));
 
@@ -976,11 +975,13 @@ public class window1 extends Application {
         Label wrongMess1 = new Label("");
         wrongMess1.setTextFill(Color.web("#FF4136"));
         wrongMess1.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
-        group.getChildren().addAll(user, username, i, id, p, phone, p1, password1, p2, password2, button, wrongMess1);
+        group.getChildren().addAll(user, username, i, id, p, phone, p1, password1, p2, password2, button, button_back, wrongMess1);
         //button.setLayoutX(330);
 
         button.setOnAction(e -> {
             try {
+                implementMethod.isValidInformation(username.getText(), id.getText(), phone.getText(), password1.getText(), password2.getText());
+
                 Command command = new Command("registerNewUser", new String[]{username.getText(), id.getText(), phone.getText(), password1.getText(), password2.getText()});
 //                ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
                 oos.writeObject(command);
@@ -988,14 +989,20 @@ public class window1 extends Application {
 
                 // 接收查询结果
                 Response response = (Response) iis.readObject();
-//                apiSpecification.RegisterNewUser(username.getText(), id.getText(), phone.getText(), password1.getText(), password2.getText());
-                signIn(stage, socket, oos, iis);
+                if (response.responseType.equals("true")) {
+                    signIn(stage, socket, oos, iis);
+                } else {
+                    wrongMess1.setText(response.responseContent);
+                }
             } catch (Exception ex) {
                 String message = ex.getMessage();
                 wrongMess1.setText(message);
             }
         });
-        Scene scene = new Scene(group, 700, 700);
+        button_back.setOnAction(e -> {
+            signIn(stage, socket, oos, iis);
+        });
+        Scene scene = new Scene(group, 700, 750);
 
         //场景放到舞台中
         stage.setScene(scene);
@@ -1009,6 +1016,9 @@ public class window1 extends Application {
     public static void signIn(Stage stage, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {//登录
         Button button = new Button("登录");
         buttonStyle(button);
+
+        Button button_back = new Button("<--注册");
+        setBtn_tp(button_back, "cadetblue", 20);
 
         Label user = new Label("User name:");
         user.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 20));
@@ -1029,7 +1039,7 @@ public class window1 extends Application {
         Label wrongMess1 = new Label("");
         wrongMess1.setTextFill(Color.web("#FF4136"));
         wrongMess1.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
-        group.getChildren().addAll(user, username, p1, password1, button, wrongMess1);
+        group.getChildren().addAll(user, username, p1, password1, button, button_back, wrongMess1);
         //button.setLayoutX(330);
 
         button.setOnAction(e -> {
@@ -1047,12 +1057,17 @@ public class window1 extends Application {
                 if (Objects.equals(response.responseType, "true")) {
                     userName = username.getText();
                     home_page(stage, socket, oos, iis);
+                } else {
+                    wrongMess1.setText(response.responseContent);
                 }
             } catch (Exception ex) {
                 String message = ex.getMessage();
                 wrongMess1.setText(message);
             }
 
+        });
+        button_back.setOnAction(e -> {
+            signUp(stage, socket, oos, iis);
         });
         Scene scene = new Scene(group, 700, 700);
         //场景放到舞台中

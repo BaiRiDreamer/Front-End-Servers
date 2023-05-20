@@ -1,4 +1,5 @@
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.List;
 
 public class Post {
@@ -16,6 +17,35 @@ public class Post {
     private List<String> authorFavorite;
     private List<String> authorShared;
     private List<String> authorLiked;
+    private String filename;
+    private Byte[] file;
+    private boolean isUnKnown;
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
+
+    public Byte[] getFile() {
+        return file;
+    }
+
+    public void setFile(Byte[] file) {
+        this.file = file;
+    }
+
+    public boolean isUnKnown() {
+        return isUnKnown;
+    }
+
+    public void setUnKnown(boolean unKnown) {
+        isUnKnown = unKnown;
+    }
+
+
 
     @Override
     public String toString() {
@@ -34,6 +64,9 @@ public class Post {
                 ", authorFavorite=" + authorFavorite +
                 ", authorShared=" + authorShared +
                 ", authorLiked=" + authorLiked +
+                ", filename=" + filename +
+                ", file=" + Arrays.toString(file) +
+                ", isUnknown=" + isUnKnown +
                 '}';
     }
 
@@ -44,87 +77,114 @@ public class Post {
     public int getPostID() {
         return postID;
     }
+
     public String getTitle() {
         return title;
     }
+
     public List<String> getCategory() {
         return category;
     }
+
     public String getContent() {
         return content;
     }
+
     public Timestamp getPostingTime() {
         return postingTime;
     }
-    public String getAuthorName () {
+
+    public String getAuthorName() {
         return authorName;
     }
+
     public String getPostingCity() {
         return postingCity;
     }
+
     public Timestamp getAuthorRegistrationTime() {
         return authorRegistrationTime;
     }
+
     public String getAuthorID() {
         return authorID;
     }
-    public String getAuthorPhone () {
+
+    public String getAuthorPhone() {
         return authorPhone;
     }
-    public  List<String> getAuthorFollowedBy() {
+
+    public List<String> getAuthorFollowedBy() {
         return authorFollowedBy;
     }
+
     public List<String> getAuthorFavorite() {
         return authorFavorite;
     }
+
     public List<String> getAuthorShared() {
         return authorShared;
     }
+
     public List<String> getAuthorLiked() {
         return authorLiked;
     }
+
     /**
      * Setter Part
      */
     public void setPostID(int postID) {
         this.postID = postID;
     }
+
     public void setTitle(String title) {
         this.title = title;
     }
+
     public void setCategory(List<String> category) {
         this.category = category;
     }
+
     public void setContent(String content) {
         this.content = content;
     }
+
     public void setPostingTime(Timestamp postingTime) {
         this.postingTime = postingTime;
     }
+
     public void setPostingCity(String postingCity) {
         this.postingCity = postingCity;
     }
-    public void setAuthorName (String authorName) {
+
+    public void setAuthorName(String authorName) {
         this.authorName = authorName;
     }
+
     public void setAuthorRegistrationTime(Timestamp authorRegistrationTime) {
         this.authorRegistrationTime = authorRegistrationTime;
     }
+
     public void setAuthorID(String authorID) {
         this.authorID = authorID;
     }
-    public void setAuthorPhone (String authorPhone) {
+
+    public void setAuthorPhone(String authorPhone) {
         this.authorPhone = authorPhone;
     }
+
     public void setAuthorFollowedBy(List<String> authorFollowedBy) {
         this.authorFollowedBy = authorFollowedBy;
     }
+
     public void setAuthorFavorite(List<String> authorFavorite) {
         this.authorFavorite = authorFavorite;
     }
+
     public void setAuthorShared(List<String> authorShared) {
         this.authorShared = authorShared;
     }
+
     public void setAuthorLiked(List<String> authorLiked) {
         this.authorLiked = authorLiked;
     }
