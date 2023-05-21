@@ -201,54 +201,63 @@ public class window1 extends Application {
 
         });
 
+        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), new EventHandler<ActionEvent>() {//15s更新一次
+            @Override
+            public void handle(ActionEvent event) {
+                try {
+                    hot_page(stage, g1, 10, 10, 10, 10, 500, 100000, 30, socket, oos, iis);
+
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }));
+//        timeline.stop();
+        timeline.setCycleCount(Timeline.INDEFINITE);
+//        timeline.play();
 
         lik_hot.setOnAction(e -> {
+            timeline.pause();
             System.out.println(hot.getItems());
             try {
-                hot_page(stage, g1, 30, 10, 10, 10, 10, 100000, 30, socket, oos, iis);
+
+                hot_page(stage, g1, 100, 10, 10, 10, 10, 100000, 30, socket, oos, iis);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
         });
         share_hot.setOnAction(e -> {
             try {
-                hot_page(stage, g1, 50, 10, 10, 10, 10, 100000, 30, socket, oos, iis);
+                timeline.pause();
+                hot_page(stage, g1, 10, 100, 10, 10, 10, 100000, 30, socket, oos, iis);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
         });
         fav_hot.setOnAction(e -> {
             try {
-                hot_page(stage, g1, 10, 10, 50, 10, 10, 100000, 30, socket, oos, iis);
+                timeline.pause();
+                hot_page(stage, g1, 10, 10, 100, 10, 10, 100000, 30, socket, oos, iis);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
         });
         re_hot.setOnAction(e -> {
             try {
-                hot_page(stage, g1, 10, 10, 10, 50, 10, 100000, 30, socket, oos, iis);
+                timeline.pause();
+                hot_page(stage, g1, 10, 10, 10, 100, 10, 100000, 30, socket, oos, iis);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
         });
         time_hot.setOnAction(e -> {
             try {
-                hot_page(stage, g1, 10, 10, 10, 10, 50, 100000, 30, socket, oos, iis);
+                timeline.playFromStart();
+
+                hot_page(stage, g1, 10, 10, 10, 10, 500, 100000, 30, socket, oos, iis);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
-            Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(15), new EventHandler<ActionEvent>() {//15s更新一次
-                @Override
-                public void handle(ActionEvent event) {
-                    try {
-                        hot_page(stage, g1, 10, 10, 10, 10, 50, 100000, 30, socket, oos, iis);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                }
-            }));
-            timeline.setCycleCount(Timeline.INDEFINITE);
-            timeline.play();
 
         });
 
