@@ -659,10 +659,25 @@ public class Tables {
         List<hot_page> postList = getTableData_hot(page, page + pageSize,likedWeight, sharedWeight, favoritedWeight, replyWeight, timeDifferenceWeight,  timeDivParameter,  limit , socket, oos, iis);
         postTable.setItems(FXCollections.observableList(postList));
 
-        postTable.setPrefHeight(450);
+        postTable.setPrefHeight(520);
         postTable.setPrefWidth(600);
 //        group.getChildren().addAll(g1, postTable);
         TableView<hot_page> sw = postTable;
+        postTable.setRowFactory(tv -> //双击查看post detail
+        {
+            TableRow<hot_page> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (!row.isEmpty())) {
+                    int p_id = sw.getSelectionModel().getSelectedItems().get(0).getPost_id();
+                    try {
+                        window1.postDetail(p_id, socket, oos, iis);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            return row;
+        });
         return postTable;
     }
 
@@ -675,22 +690,22 @@ public class Tables {
         TableColumn<hot_page, String> titleCol = new TableColumn<>("Title");
         titleCol.setCellValueFactory(new PropertyValueFactory("title"));
         TableColumn<hot_page, String> contentCol = new TableColumn<>("Content");
-        contentCol.setPrefWidth(50);
+        contentCol.setPrefWidth(150);
         contentCol.setCellValueFactory(new PropertyValueFactory("content"));
         TableColumn<hot_page, Integer> auCol = new TableColumn<>("Author");
         auCol.setCellValueFactory(new PropertyValueFactory("author_name"));
         TableColumn<hot_page, Integer> timeCol = new TableColumn<>("posting_time");
         timeCol.setCellValueFactory(new PropertyValueFactory("posting_time"));
-        TableColumn<hot_page, Integer> likeCol = new TableColumn<>("li keCnt");
-        likeCol.setCellValueFactory(new PropertyValueFactory("likeCnt"));
-        TableColumn<hot_page, Integer> shareCol = new TableColumn<>("sharedCnt");
-        shareCol.setCellValueFactory(new PropertyValueFactory("sharedCnt"));
-        TableColumn<hot_page, Integer> favCol = new TableColumn<>("favoritedCnt");
-        favCol.setCellValueFactory(new PropertyValueFactory("favoritedCnt"));
-        TableColumn<hot_page, Integer> reCol = new TableColumn<>("replyCnt");
-        reCol.setCellValueFactory(new PropertyValueFactory("favoritedCnt"));
+//        TableColumn<hot_page, Integer> likeCol = new TableColumn<>("li keCnt");
+//        likeCol.setCellValueFactory(new PropertyValueFactory("likeCnt"));
+//        TableColumn<hot_page, Integer> shareCol = new TableColumn<>("sharedCnt");
+//        shareCol.setCellValueFactory(new PropertyValueFactory("sharedCnt"));
+//        TableColumn<hot_page, Integer> favCol = new TableColumn<>("favoritedCnt");
+//        favCol.setCellValueFactory(new PropertyValueFactory("favoritedCnt"));
+//        TableColumn<hot_page, Integer> reCol = new TableColumn<>("replyCnt");
+//        reCol.setCellValueFactory(new PropertyValueFactory("favoritedCnt"));
 
-        table.getColumns().addAll(totCol,idCol, titleCol, contentCol, auCol, timeCol, likeCol, shareCol, favCol, reCol);
+        table.getColumns().addAll(totCol,idCol, titleCol, contentCol, auCol, timeCol);
 //        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         return table;
     }

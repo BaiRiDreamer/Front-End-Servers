@@ -1,8 +1,14 @@
 import com.alibaba.fastjson.JSON;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -37,6 +43,7 @@ import java.util.Objects;
 
 import javafx.scene.control.Pagination;
 import javafx.scene.control.TableView;
+import javafx.util.Duration;
 import sun.misc.IOUtils;
 
 import java.io.ByteArrayInputStream;
@@ -51,6 +58,8 @@ import javafx.scene.media.MediaView;
 import javax.imageio.ImageIO;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -125,6 +134,7 @@ public class window1 extends Application {
 
     }
 
+    static Menu hot;
 
     public static void home_page(Stage stage, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) throws Exception {
         Group g1 = new Group();
@@ -134,12 +144,18 @@ public class window1 extends Application {
         Menu self = new Menu("Self Space");
 
         MenuItem p = new MenuItem("Posts");
-        MenuItem hot = new MenuItem("Hot Lists");
+        hot = new Menu("Hot Lists");
         MenuItem self_space = new MenuItem("Self Space");
         MenuItem write_post = new MenuItem("Write Post");
-        home_page.getItems().addAll(p, hot);
+        MenuItem lik_hot = new MenuItem("喜爱榜");
+        MenuItem share_hot = new MenuItem("分享榜");
+        MenuItem fav_hot = new MenuItem("收藏榜");
+        MenuItem re_hot = new MenuItem("回复榜");
+        MenuItem time_hot = new MenuItem("实时榜");
+        hot.getItems().addAll(lik_hot, share_hot, fav_hot, re_hot, time_hot);
+        home_page.getItems().addAll(p);
         self.getItems().addAll(self_space, write_post);
-        menuBar.getMenus().addAll(home_page, self);
+        menuBar.getMenus().addAll(home_page, hot, self);
         String[] search1 = {"Author", "Title", "Content", "PostID"};
 
         ChoiceBox<String> searchBy = new ChoiceBox<>(FXCollections.observableArrayList(search1));
@@ -184,13 +200,58 @@ public class window1 extends Application {
             // set the text for the label to the selected item
 
         });
-        hot.setOnAction(e -> {
+
+
+        lik_hot.setOnAction(e -> {
+            System.out.println(hot.getItems());
             try {
-                hot_page(stage, g1, socket, oos, iis);
+                hot_page(stage, g1, 30, 10, 10, 10, 10, 100000, 30, socket, oos, iis);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
         });
+        share_hot.setOnAction(e -> {
+            try {
+                hot_page(stage, g1, 50, 10, 10, 10, 10, 100000, 30, socket, oos, iis);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+        fav_hot.setOnAction(e -> {
+            try {
+                hot_page(stage, g1, 10, 10, 50, 10, 10, 100000, 30, socket, oos, iis);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+        re_hot.setOnAction(e -> {
+            try {
+                hot_page(stage, g1, 10, 10, 10, 50, 10, 100000, 30, socket, oos, iis);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+        time_hot.setOnAction(e -> {
+            try {
+                hot_page(stage, g1, 10, 10, 10, 10, 50, 100000, 30, socket, oos, iis);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(15), new EventHandler<ActionEvent>() {//15s更新一次
+                @Override
+                public void handle(ActionEvent event) {
+                    try {
+                        hot_page(stage, g1, 10, 10, 10, 10, 50, 100000, 30, socket, oos, iis);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }));
+            timeline.setCycleCount(Timeline.INDEFINITE);
+            timeline.play();
+
+        });
+
         p.setOnAction(e ->
                 {
                     try {
@@ -238,46 +299,43 @@ public class window1 extends Application {
 
     }
 
-    public static void hot_page(Stage stage, Group g1, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) throws Exception {
-        HBox choice = new HBox(20);
-        Label label = new Label("Self_defined hot list(0-100,Rate what you care higher!):");
-        label.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
-
-        label.setLayoutY(518);
-        TextField like = new TextField();
-        like.setPromptText("Like rate");
-        like.setPrefWidth(100);
-        like.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.NORMAL, 15));
-
-        TextField share = new TextField();
-        share.setPromptText("Share rate");
-        share.setPrefWidth(100);
-        share.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
-
-        TextField fa = new TextField();
-        fa.setPromptText("favor rate");
-        fa.setPrefWidth(100);
-        fa.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
-
-        TextField re = new TextField();
-        re.setPromptText("Reply rate");
-        re.setPrefWidth(100);
-        re.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
-
-        Button getHot = new Button("Get Hot List!");
-        choice.getChildren().addAll(like, share, fa, re, getHot);
-        setBtn_tp(getHot, "cadetblue", 15);
-        choice.setLayoutY(550);
+    public static void hot_page(Stage stage, Group g1, int likedWeight, int sharedWeight,
+                                int favoritedWeight, int replyWeight, int timeDifferenceWeight,
+                                int timeDivParameter, int limit, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) throws Exception {
+//        HBox choice = new HBox(20);
+//        Label label = new Label("Self_defined hot list(0-100,Rate what you care higher!):");
+//        label.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
+//
+//        label.setLayoutY(518);
+//        TextField like = new TextField();
+//        like.setPromptText("Like rate");
+//        like.setPrefWidth(100);
+//        like.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.NORMAL, 15));
+//
+//        TextField share = new TextField();
+//        share.setPromptText("Share rate");
+//        share.setPrefWidth(100);
+//        share.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
+//
+//        TextField fa = new TextField();
+//        fa.setPromptText("favor rate");
+//        fa.setPrefWidth(100);
+//        fa.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
+//
+//        TextField re = new TextField();
+//        re.setPromptText("Reply rate");
+//        re.setPrefWidth(100);
+//        re.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
+//
+//        Button getHot = new Button("Get Hot List!");
+//        choice.getChildren().addAll(like, share, fa, re, getHot);
+//        setBtn_tp(getHot, "cadetblue", 15);
+//        choice.setLayoutY(550);
         stage.setTitle("Hot Lists");
         Pagination pagination = new Pagination(calPostCnt(socket, oos, iis) / 49 + 1, 0);
-        pagination.setPageFactory(pageIndex -> Tables.createPage_hot(pageIndex, 50, 20, 10, 10, 15, 15, 100000, 30, socket, oos, iis));
+        pagination.setPageFactory(pageIndex -> Tables.createPage_hot(pageIndex, 50, likedWeight, sharedWeight, favoritedWeight, replyWeight, timeDifferenceWeight, timeDivParameter, limit, socket, oos, iis));
         pagination.setLayoutY(30);
-        Group group = new Group(g1, pagination,label, choice);
-
-        getHot.setOnAction(e->{
-            pagination.setPageFactory(pageIndex -> Tables.createPage_hot(pageIndex, 50, Integer.parseInt(like.getText()), Integer.parseInt(share.getText()), Integer.parseInt(fa.getText()), Integer.parseInt(re.getText()), 15, 100000, 30, socket, oos, iis));
-
-        });
+        Group group = new Group(g1, pagination);
 
 
         Scene scene = new Scene(group, 600, 600);
@@ -290,6 +348,21 @@ public class window1 extends Application {
         stage.show();
 
     }
+
+    static int x = 0;
+
+
+    //   原理就是创建一个Timer，并创建一个任务TimerTask，在任务的run方法里面执行：
+//
+//        Platform.runLater(new
+//
+//    Runnable() {
+//        @Override
+//        public void run () {
+//            //更新ui代码
+//        }
+
+//    });
 
     public static void get_search(Stage stage, Group g1, Socket socket, String author_name, String title, String content, int postId, ObjectOutputStream oos, ObjectInputStream iis) throws Exception {
         Pagination pagination = new Pagination(5, 0);
