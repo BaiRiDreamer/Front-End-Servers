@@ -610,4 +610,90 @@ public class Tables {
         return replyTable;
     }
 
+    public static List<hot_page> getTableData_hot(int from, int to, int likedWeight, int sharedWeight, int favoritedWeight, int replyWeight, int timeDifferenceWeight, int timeDivParameter, int limit, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
+        List<hot_page> postData = new ArrayList<>();
+        try {
+            Command command = new Command("getHotSearches", new String[]{"" + likedWeight, "" + sharedWeight, "" + favoritedWeight, "" + replyWeight, "" + timeDifferenceWeight, "" + timeDivParameter, "" + limit});
+            oos.writeObject(command);
+            oos.flush();
+
+            // 接收查询结果
+            Response response = (Response) iis.readObject();
+            String post_json = response.responseContent;
+            List<hot_page> posts = JSON.parseArray(post_json, hot_page.class);
+            for (int i = from; i <= to; i++) {
+                if (posts.size() == 0) {
+                    break;
+                }
+                hot_page h = new hot_page();
+                h.setPost_id(posts.get(i).getPost_id());
+                h.setTitle(posts.get(i).getTitle());
+                h.setContent(posts.get(i).getContent());
+                h.setPosting_time(posts.get(i).getPosting_time());
+                h.setPosting_city_id(posts.get(i).getPosting_city_id());
+                h.setAuthor_name(posts.get(i).getAuthor_name());
+                h.setFilename(posts.get(i).getFilename());
+                h.setFile(posts.get(i).getFile());
+                h.setIsunKnown(posts.get(i).isIsunKnown());
+                h.setTotalWeight(posts.get(i).getTotalWeight());
+                h.setLikeCnt(posts.get(i).getLikeCnt());
+                h.setSharedCnt(posts.get(i).getSharedCnt());
+                h.setFavoritedCnt(posts.get(i).getFavoritedCnt());
+                h.setReplyCnt(posts.get(i).getReplyCnt());
+                h.setTimeDifference(posts.get(i).getTimeDifference());
+
+                postData.add(h);
+            }
+        } catch (Exception ex) {
+            String message = ex.getMessage();
+            System.out.println(message);
+        }
+        return postData;
+    }
+
+    public static TableView<hot_page> createPage_hot(int pageIndex, int pageSize,  int likedWeight, int sharedWeight,
+                                                     int favoritedWeight, int replyWeight, int timeDifferenceWeight,
+                                                     int timeDivParameter, int limit, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
+        int page = pageIndex * pageSize;
+        TableView<hot_page> postTable = createTable_hot();
+        List<hot_page> postList = getTableData_hot(page, page + pageSize,likedWeight, sharedWeight, favoritedWeight, replyWeight, timeDifferenceWeight,  timeDivParameter,  limit , socket, oos, iis);
+        postTable.setItems(FXCollections.observableList(postList));
+
+        postTable.setPrefHeight(450);
+        postTable.setPrefWidth(600);
+//        group.getChildren().addAll(g1, postTable);
+        TableView<hot_page> sw = postTable;
+        return postTable;
+    }
+
+    public static TableView<hot_page> createTable_hot() {
+        TableView<hot_page> table = new TableView<>();
+        TableColumn<hot_page, Integer> totCol = new TableColumn<>("Hot value");
+        totCol.setCellValueFactory(new PropertyValueFactory("totalWeight"));
+        TableColumn<hot_page, Integer> idCol = new TableColumn<>("post_id");
+        idCol.setCellValueFactory(new PropertyValueFactory("post_id"));
+        TableColumn<hot_page, String> titleCol = new TableColumn<>("Title");
+        titleCol.setCellValueFactory(new PropertyValueFactory("title"));
+        TableColumn<hot_page, String> contentCol = new TableColumn<>("Content");
+        contentCol.setPrefWidth(50);
+        contentCol.setCellValueFactory(new PropertyValueFactory("content"));
+        TableColumn<hot_page, Integer> auCol = new TableColumn<>("Author");
+        auCol.setCellValueFactory(new PropertyValueFactory("author_name"));
+        TableColumn<hot_page, Integer> timeCol = new TableColumn<>("posting_time");
+        timeCol.setCellValueFactory(new PropertyValueFactory("posting_time"));
+        TableColumn<hot_page, Integer> likeCol = new TableColumn<>("li keCnt");
+        likeCol.setCellValueFactory(new PropertyValueFactory("likeCnt"));
+        TableColumn<hot_page, Integer> shareCol = new TableColumn<>("sharedCnt");
+        shareCol.setCellValueFactory(new PropertyValueFactory("sharedCnt"));
+        TableColumn<hot_page, Integer> favCol = new TableColumn<>("favoritedCnt");
+        favCol.setCellValueFactory(new PropertyValueFactory("favoritedCnt"));
+        TableColumn<hot_page, Integer> reCol = new TableColumn<>("replyCnt");
+        reCol.setCellValueFactory(new PropertyValueFactory("favoritedCnt"));
+
+        table.getColumns().addAll(totCol,idCol, titleCol, contentCol, auCol, timeCol, likeCol, shareCol, favCol, reCol);
+//        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        return table;
+    }
+
+
 }

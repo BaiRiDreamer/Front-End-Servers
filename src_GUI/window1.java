@@ -134,9 +134,10 @@ public class window1 extends Application {
         Menu self = new Menu("Self Space");
 
         MenuItem p = new MenuItem("Posts");
+        MenuItem hot = new MenuItem("Hot Lists");
         MenuItem self_space = new MenuItem("Self Space");
         MenuItem write_post = new MenuItem("Write Post");
-        home_page.getItems().addAll(p);
+        home_page.getItems().addAll(p, hot);
         self.getItems().addAll(self_space, write_post);
         menuBar.getMenus().addAll(home_page, self);
         String[] search1 = {"Author", "Title", "Content", "PostID"};
@@ -163,13 +164,13 @@ public class window1 extends Application {
                 }
             } else if (searchBy.getValue().equals("Title")) {
                 try {
-                    get_search(stage, g1, socket,  "",search.getText(), "", 0, oos, iis);
+                    get_search(stage, g1, socket, "", search.getText(), "", 0, oos, iis);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             } else if (searchBy.getValue().equals("Content")) {
                 try {
-                    get_search(stage, g1, socket, "", "",search.getText() ,0, oos, iis);
+                    get_search(stage, g1, socket, "", "", search.getText(), 0, oos, iis);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -183,7 +184,13 @@ public class window1 extends Application {
             // set the text for the label to the selected item
 
         });
-
+        hot.setOnAction(e -> {
+            try {
+                hot_page(stage, g1, socket, oos, iis);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
         p.setOnAction(e ->
                 {
                     try {
@@ -218,6 +225,59 @@ public class window1 extends Application {
         pagination.setPageFactory(pageIndex -> Tables.createPage(pageIndex, 50, socket, oos, iis));
         pagination.setLayoutY(30);
         Group group = new Group(g1, pagination);
+
+
+        Scene scene = new Scene(group, 600, 600);
+
+        //场景放到舞台中
+        stage.setScene(scene);
+//        stage.setX(700);//出现在屏幕中的位置
+//        stage.setY(200);
+        stage.setResizable(false);
+        stage.show();
+
+    }
+
+    public static void hot_page(Stage stage, Group g1, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) throws Exception {
+        HBox choice = new HBox(20);
+        Label label = new Label("Self_defined hot list(0-100,Rate what you care higher!):");
+        label.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
+
+        label.setLayoutY(518);
+        TextField like = new TextField();
+        like.setPromptText("Like rate");
+        like.setPrefWidth(100);
+        like.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.NORMAL, 15));
+
+        TextField share = new TextField();
+        share.setPromptText("Share rate");
+        share.setPrefWidth(100);
+        share.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
+
+        TextField fa = new TextField();
+        fa.setPromptText("favor rate");
+        fa.setPrefWidth(100);
+        fa.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
+
+        TextField re = new TextField();
+        re.setPromptText("Reply rate");
+        re.setPrefWidth(100);
+        re.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
+
+        Button getHot = new Button("Get Hot List!");
+        choice.getChildren().addAll(like, share, fa, re, getHot);
+        setBtn_tp(getHot, "cadetblue", 15);
+        choice.setLayoutY(550);
+        stage.setTitle("Hot Lists");
+        Pagination pagination = new Pagination(calPostCnt(socket, oos, iis) / 49 + 1, 0);
+        pagination.setPageFactory(pageIndex -> Tables.createPage_hot(pageIndex, 50, 20, 10, 10, 15, 15, 100000, 30, socket, oos, iis));
+        pagination.setLayoutY(30);
+        Group group = new Group(g1, pagination,label, choice);
+
+        getHot.setOnAction(e->{
+            pagination.setPageFactory(pageIndex -> Tables.createPage_hot(pageIndex, 50, Integer.parseInt(like.getText()), Integer.parseInt(share.getText()), Integer.parseInt(fa.getText()), Integer.parseInt(re.getText()), 15, 100000, 30, socket, oos, iis));
+
+        });
 
 
         Scene scene = new Scene(group, 600, 600);
