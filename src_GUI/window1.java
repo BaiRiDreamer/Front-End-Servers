@@ -47,8 +47,13 @@ import java.io.ByteArrayInputStream;
 import javax.imageio.ImageIO;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.Scanner;
+import java.util.regex.Pattern;
 
 public class window1 extends Application {
+
+    public String host = "10.25.3.249" ;
+    public int port = 7345;
 
     public window1() throws IOException {
     }
@@ -61,10 +66,34 @@ public class window1 extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+
+        try
+        {   String desktopPath = System.getProperty("user.home") + "\\Desktop\\front.properties";
+            Scanner scanner = new Scanner(new File(desktopPath));
+            String  hostRegex = "Host = \".+\"";
+            String  portRegex = "Port = \"[0-9]*\"";
+
+            while (scanner.hasNextLine())
+            {
+                String line = scanner.nextLine();
+                line = line.trim();
+                if (Pattern.matches(hostRegex, line))
+                {
+                    host = line.substring(8, line.length() - 1);
+                }
+                else if (line.matches(portRegex))
+                {
+                    port = Integer.parseInt(line.substring(8, line.length() - 1));
+                }
+            }
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            System.err.println("front.properties not found");
+        }
+
         try {
-            String host = "10.25.3.249";
-//            String host = "localhost";
-            int port = 7345;
             Socket socket = new Socket(host, port);
             ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
             ObjectInputStream iis = new ObjectInputStream(socket.getInputStream());

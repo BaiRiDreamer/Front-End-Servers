@@ -13,16 +13,27 @@ public class Main
 //            String host = "localhost";
             int port = 7345;
             Socket socket = new Socket(host, port);
+            ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+            ObjectInputStream  ois = new ObjectInputStream(socket.getInputStream());
 
             // 发送查询请求
-            Command command = new Command("isUserValid", new String[]{"1", "2"});
-            ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-            oos.writeObject(command);
+            oos.writeObject(new Command("isUserValid", new String[]{"liweihao", "liweihao"}));
+            oos.flush();
+
+
+            // 接收查询结果
+            Response response = (Response) ois.readObject();
+            System.out.println(response.toString());
+
+
+
+            // 发送查询请求
+            oos.writeObject(new Command("registerNewUser", new String[]{"liweihao", "666666", "17513173664", "liwiehao"}));
             oos.flush();
 
             // 接收查询结果
-            Response response = (Response) new ObjectInputStream(socket.getInputStream()).readObject();
-            System.out.println(response.toString());
+            Response response2 = (Response) ois.readObject();
+            System.out.println(response2.toString());
         }
         catch (IOException | ClassNotFoundException e)
         {
