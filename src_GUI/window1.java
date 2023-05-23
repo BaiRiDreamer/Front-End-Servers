@@ -137,7 +137,24 @@ public class window1 extends Application {
     static Menu hot;
 
     public static void home_page(Stage stage, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) throws Exception {
+        stage.setTitle("Home Page");
         Group g1 = new Group();
+        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(15), new EventHandler<ActionEvent>() {//15s更新一次
+            @Override
+            public void handle(ActionEvent event) {
+                try {
+                    stage.setTitle("Hot Lists-实时（15s刷新一次）");
+                    hot_page(stage, g1, 10, 10, 10, 10, 500, 100000, 30, socket, oos, iis);
+
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }));
+//        timeline.stop();
+        timeline.setCycleCount(Timeline.INDEFINITE);
+//        timeline.play();
+        timeline.pause();
 
         MenuBar menuBar = new MenuBar();
         Menu home_page = new Menu("Home Page");
@@ -171,6 +188,8 @@ public class window1 extends Application {
         searchBtn.setLayoutX(550);
 
         searchBtn.setOnAction(e -> {
+            stage.setTitle("Home Page");
+            timeline.pause();
             System.out.println(search.getText());
             if (searchBy.getValue().equals("Author")) {
                 try {
@@ -201,27 +220,12 @@ public class window1 extends Application {
 
         });
 
-        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), new EventHandler<ActionEvent>() {//15s更新一次
-            @Override
-            public void handle(ActionEvent event) {
-                try {
-                    hot_page(stage, g1, 10, 10, 10, 10, 500, 100000, 30, socket, oos, iis);
-
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            }
-        }));
-//        timeline.stop();
-        timeline.setCycleCount(Timeline.INDEFINITE);
-//        timeline.play();
 
         lik_hot.setOnAction(e -> {
             timeline.pause();
-            System.out.println(hot.getItems());
             try {
-
-                hot_page(stage, g1, 100, 10, 10, 10, 10, 100000, 30, socket, oos, iis);
+                stage.setTitle("Hot Lists-like");
+                hot_page(stage, g1, 500, 10, 10, 10, 10, 100000, 30, socket, oos, iis);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -229,7 +233,8 @@ public class window1 extends Application {
         share_hot.setOnAction(e -> {
             try {
                 timeline.pause();
-                hot_page(stage, g1, 10, 100, 10, 10, 10, 100000, 30, socket, oos, iis);
+                stage.setTitle("Hot Lists-share");
+                hot_page(stage, g1, 10, 500, 10, 10, 10, 100000, 30, socket, oos, iis);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -237,7 +242,8 @@ public class window1 extends Application {
         fav_hot.setOnAction(e -> {
             try {
                 timeline.pause();
-                hot_page(stage, g1, 10, 10, 100, 10, 10, 100000, 30, socket, oos, iis);
+                stage.setTitle("Hot Lists-favorite");
+                hot_page(stage, g1, 10, 10, 500, 10, 10, 100000, 30, socket, oos, iis);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -245,7 +251,8 @@ public class window1 extends Application {
         re_hot.setOnAction(e -> {
             try {
                 timeline.pause();
-                hot_page(stage, g1, 10, 10, 10, 100, 10, 100000, 30, socket, oos, iis);
+                stage.setTitle("Hot Lists-reply");
+                hot_page(stage, g1, 10, 10, 10, 500, 10, 100000, 30, socket, oos, iis);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -253,7 +260,7 @@ public class window1 extends Application {
         time_hot.setOnAction(e -> {
             try {
                 timeline.playFromStart();
-
+                stage.setTitle("Hot Lists-实时（15s刷新一次)");
                 hot_page(stage, g1, 10, 10, 10, 10, 500, 100000, 30, socket, oos, iis);
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -263,6 +270,7 @@ public class window1 extends Application {
 
         p.setOnAction(e ->
                 {
+                    timeline.pause();
                     try {
                         home_page(stage, socket, oos, iis);
                     } catch (Exception ex) {
@@ -272,6 +280,7 @@ public class window1 extends Application {
         );
         self_space.setOnAction(e ->
                 {
+                    timeline.pause();
                     try {
                         self_Space(stage, socket, oos, iis);
                     } catch (Exception ex) {
@@ -281,6 +290,7 @@ public class window1 extends Application {
         );
         write_post.setOnAction(e ->
                 {
+                    timeline.pause();
                     try {
                         write_post(socket, oos, iis);
                     } catch (Exception ex) {
@@ -299,10 +309,7 @@ public class window1 extends Application {
 
         Scene scene = new Scene(group, 600, 600);
 
-        //场景放到舞台中
         stage.setScene(scene);
-//        stage.setX(700);//出现在屏幕中的位置
-//        stage.setY(200);
         stage.setResizable(false);
         stage.show();
 
@@ -311,37 +318,8 @@ public class window1 extends Application {
     public static void hot_page(Stage stage, Group g1, int likedWeight, int sharedWeight,
                                 int favoritedWeight, int replyWeight, int timeDifferenceWeight,
                                 int timeDivParameter, int limit, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) throws Exception {
-//        HBox choice = new HBox(20);
-//        Label label = new Label("Self_defined hot list(0-100,Rate what you care higher!):");
-//        label.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
-//
-//        label.setLayoutY(518);
-//        TextField like = new TextField();
-//        like.setPromptText("Like rate");
-//        like.setPrefWidth(100);
-//        like.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.NORMAL, 15));
-//
-//        TextField share = new TextField();
-//        share.setPromptText("Share rate");
-//        share.setPrefWidth(100);
-//        share.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
-//
-//        TextField fa = new TextField();
-//        fa.setPromptText("favor rate");
-//        fa.setPrefWidth(100);
-//        fa.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
-//
-//        TextField re = new TextField();
-//        re.setPromptText("Reply rate");
-//        re.setPrefWidth(100);
-//        re.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 15));
-//
-//        Button getHot = new Button("Get Hot List!");
-//        choice.getChildren().addAll(like, share, fa, re, getHot);
-//        setBtn_tp(getHot, "cadetblue", 15);
-//        choice.setLayoutY(550);
-        stage.setTitle("Hot Lists");
-        Pagination pagination = new Pagination(calPostCnt(socket, oos, iis) / 49 + 1, 0);
+
+        Pagination pagination = new Pagination(1, 0);
         pagination.setPageFactory(pageIndex -> Tables.createPage_hot(pageIndex, 50, likedWeight, sharedWeight, favoritedWeight, replyWeight, timeDifferenceWeight, timeDivParameter, limit, socket, oos, iis));
         pagination.setLayoutY(30);
         Group group = new Group(g1, pagination);
@@ -358,20 +336,6 @@ public class window1 extends Application {
 
     }
 
-    static int x = 0;
-
-
-    //   原理就是创建一个Timer，并创建一个任务TimerTask，在任务的run方法里面执行：
-//
-//        Platform.runLater(new
-//
-//    Runnable() {
-//        @Override
-//        public void run () {
-//            //更新ui代码
-//        }
-
-//    });
 
     public static void get_search(Stage stage, Group g1, Socket socket, String author_name, String title, String content, int postId, ObjectOutputStream oos, ObjectInputStream iis) throws Exception {
         Pagination pagination = new Pagination(5, 0);
@@ -789,15 +753,25 @@ public class window1 extends Application {
 
     }
 
-    public static void see_react_authors(ObjectOutputStream oos, ObjectInputStream iis, int postId, String reactType, Socket socket) {
+    public static void see_react_authors(ObjectOutputStream oos, ObjectInputStream iis, int postId, String reactType, Socket socket) throws IOException, ClassNotFoundException {
         Stage smallStage = new Stage();
 
         Point pp = MouseInfo.getPointerInfo().getLocation();
         smallStage.setX(pp.getX());//出现在屏幕中的位置
         smallStage.setY(pp.getY());
 
-        Pagination pagination_like = new Pagination(reactAuthorCnt / 29 + 1, 0);
-        pagination_like.setPageFactory(pageIndex -> Tables.createPage_react(pageIndex, 25, reactType, postId, socket, oos, iis));
+        Command command = new Command(reactType, new String[]{postId + ""});
+        oos.writeObject(command);
+        oos.flush();
+
+        // 接收查询结果
+        Response response = (Response) iis.readObject();
+        String post_json = response.responseContent;
+        List<Post> posts = JSON.parseArray(post_json, Post.class);
+        reactAuthorCnt = posts.size();
+
+        Pagination pagination_like = new Pagination(reactAuthorCnt / 24 + 1, 0);
+        pagination_like.setPageFactory(pageIndex -> Tables.createPage_react(pageIndex, 25,posts, reactType, postId, socket, oos, iis));
         pagination_like.setLayoutY(0);
         Group group_r1 = new Group(pagination_like);
 
@@ -1074,18 +1048,30 @@ public class window1 extends Application {
                 setHandle(seeLikes);
                 seeLikes.setOnAction(e ->
                 {
-                    see_react_authors(oos, iis, postId, "getPostLiked", socket);
+                    try {
+                        see_react_authors(oos, iis, postId, "getPostLiked", socket);
+                    } catch (IOException | ClassNotFoundException ex) {
+                        ex.printStackTrace();
+                    }
                 });
                 setHandle(seeShares);
                 seeShares.setOnAction(e ->
                         {
-                            see_react_authors(oos, iis, postId, "getPostShared", socket);
+                            try {
+                                see_react_authors(oos, iis, postId, "getPostShared", socket);
+                            } catch (IOException | ClassNotFoundException ex) {
+                                ex.printStackTrace();
+                            }
                         }
                 );
                 setHandle(seeFavorites);
                 seeFavorites.setOnAction(e ->
                         {
-                            see_react_authors(oos, iis, postId, "getPostfavorited", socket);
+                            try {
+                                see_react_authors(oos, iis, postId, "getPostfavorited", socket);
+                            } catch (IOException | ClassNotFoundException ex) {
+                                ex.printStackTrace();
+                            }
                         }
                 );
                 setHandle(follow_au);

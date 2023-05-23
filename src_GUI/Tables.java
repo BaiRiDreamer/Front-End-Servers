@@ -50,6 +50,7 @@ public class Tables {
         auCol.setCellValueFactory(new PropertyValueFactory("author_name"));
         TableColumn<Post, Integer> timeCol = new TableColumn<>("Post Time");
         timeCol.setCellValueFactory(new PropertyValueFactory("posting_time"));
+        table.setPlaceholder(new Label("还没有任何帖子呢(┬┬﹏┬┬)"));
 
         table.getColumns().addAll(idCol, titleCol, contentCol, auCol, timeCol);
 //        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -198,14 +199,16 @@ public class Tables {
         auCol.setCellValueFactory(new PropertyValueFactory("author_name"));
         auCol.setPrefWidth(180);
         table.getColumns().addAll(auCol);
+        table.setPlaceholder(new Label("还没有任何作者喜欢/转发/收藏(┬┬﹏┬┬)"));
+
 //        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         return table;
     }
 
-    public static TableView<Post> createPage_react(int pageIndex, int pageSize, String reactType, int postId, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
+    public static TableView<Post> createPage_react(int pageIndex, int pageSize, List<Post> posts, String reactType, int postId, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
         int page = pageIndex * pageSize;
         TableView<Post> postTable = createTable_react();
-        List<Post> postList = getTableData_react(page, page + pageSize, postId, reactType, socket, oos, iis);
+        List<Post> postList = getTableData_react(page, page + pageSize, posts,postId, reactType, socket, oos, iis);
         postTable.setItems(FXCollections.observableList(postList));
 
         postTable.setPrefHeight(350);
@@ -218,18 +221,18 @@ public class Tables {
 
     public static int replyCnt;
 
-    public static List<Post> getTableData_react(int from, int to, int postId, String react_type, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
+    public static List<Post> getTableData_react(int from, int to, List<Post> posts, int postId, String react_type, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
         List<Post> postData = new ArrayList<>();
         try {
-            Command command = new Command(react_type, new String[]{postId + ""});
-            oos.writeObject(command);
-            oos.flush();
-
-            // 接收查询结果
-            Response response = (Response) iis.readObject();
-            String post_json = response.responseContent;
-            List<Post> posts = JSON.parseArray(post_json, Post.class);
-            window1.reactAuthorCnt = posts.size();
+//            Command command = new Command(react_type, new String[]{postId + ""});
+//            oos.writeObject(command);
+//            oos.flush();
+//
+//            // 接收查询结果
+//            Response response = (Response) iis.readObject();
+//            String post_json = response.responseContent;
+//            List<Post> posts = JSON.parseArray(post_json, Post.class);
+//            window1.reactAuthorCnt = posts.size();
             for (int i = from; i <= to; i++) {
                 if (posts.size() == 0) {
                     break;
@@ -258,6 +261,7 @@ public class Tables {
         starCol.setCellValueFactory(new PropertyValueFactory("reply_stars"));
         TableColumn<Replies, String> replyAuthor = new TableColumn<>("Reply Author");
         replyAuthor.setCellValueFactory(new PropertyValueFactory("reply_author"));
+        table.setPlaceholder(new Label("该post还没有任何回复(●'◡'●)"));
 
         table.getColumns().addAll(re_idCol, postId, re_conCol, starCol, replyAuthor);
 //        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -335,6 +339,7 @@ public class Tables {
         starCol.setCellValueFactory(new PropertyValueFactory("sec_reply_stars"));
         TableColumn<Replies, String> replyAuthor = new TableColumn<>("Reply Author");
         replyAuthor.setCellValueFactory(new PropertyValueFactory("sec_reply_author"));
+        table.setPlaceholder(new Label("该回复还没有任何回复捏(●'◡'●)"));
 
         table.getColumns().addAll(secre_idCol, re_conCol, starCol, replyAuthor);
 //        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -398,7 +403,7 @@ public class Tables {
             Response response = (Response) iis.readObject();
             String post_json = response.responseContent;
             List<Author_foll> posts = JSON.parseArray(post_json, Author_foll.class);
-            window1.reactAuthorCnt = posts.size();
+//            window1.reactAuthorCnt = posts.size();
             for (int i = from; i <= to; i++) {
                 if (i >= posts.size() || posts.size() == 0) {
                     break;
@@ -422,7 +427,7 @@ public class Tables {
         auCol.setCellValueFactory(new PropertyValueFactory("followedAuthorName"));
         auCol.setPrefWidth(180);
 //        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-
+        table.setPlaceholder(new Label("您还未关注任何作者(●'◡'●)"));
         table.getColumns().add(auCol);
 
         return table;
@@ -527,6 +532,7 @@ public class Tables {
         auCol.setCellValueFactory(new PropertyValueFactory("author_name"));
         TableColumn<Post, Integer> timeCol = new TableColumn<>("Post Time");
         timeCol.setCellValueFactory(new PropertyValueFactory("posting_time"));
+        table.setPlaceholder(new Label("您还未喜欢/分享/收藏任何post(●'◡'●)"));
 
         table.getColumns().addAll(idCol, titleCol, contentCol, auCol, timeCol);
 //        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -545,6 +551,7 @@ public class Tables {
         starCol.setCellValueFactory(new PropertyValueFactory("reply_stars"));
         TableColumn<Replies, String> post_content = new TableColumn<>("Post content");
         post_content.setCellValueFactory(new PropertyValueFactory("content"));
+        table.setPlaceholder(new Label("您还未回复任何post(●'◡'●)"));
 
         table.getColumns().addAll(re_idCol, postId, re_conCol, post_content, starCol);
 //        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -696,6 +703,8 @@ public class Tables {
         auCol.setCellValueFactory(new PropertyValueFactory("author_name"));
         TableColumn<hot_page, Integer> timeCol = new TableColumn<>("posting_time");
         timeCol.setCellValueFactory(new PropertyValueFactory("posting_time"));
+        table.setPlaceholder(new Label("还没有任何post上榜(●'◡'●)"));
+
 //        TableColumn<hot_page, Integer> likeCol = new TableColumn<>("li keCnt");
 //        likeCol.setCellValueFactory(new PropertyValueFactory("likeCnt"));
 //        TableColumn<hot_page, Integer> shareCol = new TableColumn<>("sharedCnt");
