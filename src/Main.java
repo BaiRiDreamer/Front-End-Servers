@@ -9,7 +9,8 @@ public class Main
     {
         try
         {
-            String host = "localhost";
+            String host = "10.25.3.249";
+//            String host = "localhost";
             int port = 7345;
             Socket socket = new Socket(host, port);
 

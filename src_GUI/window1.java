@@ -40,28 +40,13 @@ import java.io.*;
 import java.net.Socket;
 import java.util.List;
 import java.util.Objects;
-
 import javafx.scene.control.Pagination;
 import javafx.scene.control.TableView;
 import javafx.util.Duration;
-import sun.misc.IOUtils;
-
 import java.io.ByteArrayInputStream;
-
-import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.layout.StackPane;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
-import javafx.scene.media.MediaView;
-
 import javax.imageio.ImageIO;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 public class window1 extends Application {
 
@@ -77,8 +62,8 @@ public class window1 extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         try {
-
-            String host = "localhost";
+            String host = "10.25.3.249";
+//            String host = "localhost";
             int port = 7345;
             Socket socket = new Socket(host, port);
             ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
@@ -144,7 +129,7 @@ public class window1 extends Application {
             public void handle(ActionEvent event) {
                 try {
                     stage.setTitle("Hot Lists-实时（15s刷新一次）");
-                    hot_page(stage, g1, 10, 10, 10, 10, 500, 100000, 30, socket, oos, iis);
+                    hot_page(stage, g1, 1, 1, 1, 1, 500, 10000, 30, socket, oos, iis);
 
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -261,7 +246,7 @@ public class window1 extends Application {
             try {
                 timeline.playFromStart();
                 stage.setTitle("Hot Lists-实时（15s刷新一次)");
-                hot_page(stage, g1, 10, 10, 10, 10, 500, 100000, 30, socket, oos, iis);
+                hot_page(stage, g1, 1, 1, 1, 1, 500, 10000, 30, socket, oos, iis);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
