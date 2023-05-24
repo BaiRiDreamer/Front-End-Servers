@@ -46,7 +46,7 @@ class implementMethod {
         if (title == null || content == null || title.trim().equals("") || content.trim().equals("")) {
             throw new Exception("输入的内容为空，请重新输入。");
         }
-        if (!title.matches("[a-zA-Z]*")) {
+        if (!title.matches("[1-9a-zA-Z]*")) {
             throw new Exception("输入的标题格式不符，请重新输入。");
         }
         return;

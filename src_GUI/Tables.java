@@ -605,16 +605,15 @@ public class Tables {
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && (!row.isEmpty())) {
                     int r_id = sw.getSelectionModel().getSelectedItems().get(0).getReply_id();
-//                    try {
-//                        replyDetail(r_id,postId, socket, oos, iis);
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
+                    try {
+                        window1.replyDetail(r_id, socket, oos, iis);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             });
             return row;
-        });
-        return replyTable;
+        });        return replyTable;
     }
 
     public static List<hot_page> getTableData_hot(int from, int to, int likedWeight, int sharedWeight, int favoritedWeight, int replyWeight, int timeDifferenceWeight, int timeDivParameter, int limit, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {

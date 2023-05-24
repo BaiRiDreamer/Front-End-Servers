@@ -40,9 +40,11 @@ import java.io.*;
 import java.net.Socket;
 import java.util.List;
 import java.util.Objects;
+
 import javafx.scene.control.Pagination;
 import javafx.scene.control.TableView;
 import javafx.util.Duration;
+
 import java.io.ByteArrayInputStream;
 import javax.imageio.ImageIO;
 import java.io.FileInputStream;
@@ -52,7 +54,7 @@ import java.util.regex.Pattern;
 
 public class window1 extends Application {
 
-    public String host = "10.25.3.249" ;
+    public String host = "10.25.3.249";
     public int port = 7345;
 
     public window1() throws IOException {
@@ -67,28 +69,22 @@ public class window1 extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
 
-        try
-        {   String desktopPath = System.getProperty("user.home") + "\\Desktop\\front.properties";
+        try {
+            String desktopPath = System.getProperty("user.home") + "\\Desktop\\front.properties";
             Scanner scanner = new Scanner(new File(desktopPath));
-            String  hostRegex = "Host = \".+\"";
-            String  portRegex = "Port = \"[0-9]*\"";
+            String hostRegex = "Host = \".+\"";
+            String portRegex = "Port = \"[0-9]*\"";
 
-            while (scanner.hasNextLine())
-            {
+            while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
                 line = line.trim();
-                if (Pattern.matches(hostRegex, line))
-                {
+                if (Pattern.matches(hostRegex, line)) {
                     host = line.substring(8, line.length() - 1);
-                }
-                else if (line.matches(portRegex))
-                {
+                } else if (line.matches(portRegex)) {
                     port = Integer.parseInt(line.substring(8, line.length() - 1));
                 }
             }
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
             System.err.println("front.properties not found");
         }
@@ -187,7 +183,7 @@ public class window1 extends Application {
         home_page.getItems().addAll(p);
         self.getItems().addAll(self_space, write_post);
         menuBar.getMenus().addAll(home_page, hot, self);
-        String[] search1 = {"Author", "Title", "Content", "PostID"};
+        String[] search1 = {"Author", "Title", "Content"};
 
         ChoiceBox<String> searchBy = new ChoiceBox<>(FXCollections.observableArrayList(search1));
         searchBy.setValue("Author");
@@ -223,15 +219,9 @@ public class window1 extends Application {
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
-            } else if (searchBy.getValue().equals("PostID")) {
-                try {
-                    get_search(stage, g1, socket, search.getText(), "", "", 0, oos, iis);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
             }
-            // set the text for the label to the selected item
 
+            // set the text for the label to the selected item
         });
 
 
@@ -785,7 +775,7 @@ public class window1 extends Application {
         reactAuthorCnt = posts.size();
 
         Pagination pagination_like = new Pagination(reactAuthorCnt / 24 + 1, 0);
-        pagination_like.setPageFactory(pageIndex -> Tables.createPage_react(pageIndex, 25,posts, reactType, postId, socket, oos, iis));
+        pagination_like.setPageFactory(pageIndex -> Tables.createPage_react(pageIndex, 25, posts, reactType, postId, socket, oos, iis));
         pagination_like.setLayoutY(0);
         Group group_r1 = new Group(pagination_like);
 
