@@ -154,7 +154,7 @@ public class window1 extends Application {
             public void handle(ActionEvent event) {
                 try {
                     stage.setTitle("Hot Lists-实时（15s刷新一次）");
-                    hot_page(stage, g1, 1, 1, 1, 1, 500, 10000, 30, socket, oos, iis);
+                    hot_page(stage, g1, 0, 0, 0, 0, 1, 1000000000, 30, socket, oos, iis);
 
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -171,6 +171,7 @@ public class window1 extends Application {
         Menu self = new Menu("Self Space");
 
         MenuItem p = new MenuItem("Posts");
+        MenuItem muti = new MenuItem("Search By multi-parameters");
         hot = new Menu("Hot Lists");
         MenuItem self_space = new MenuItem("Self Space");
         MenuItem write_post = new MenuItem("Write Post");
@@ -180,7 +181,7 @@ public class window1 extends Application {
         MenuItem re_hot = new MenuItem("回复榜");
         MenuItem time_hot = new MenuItem("实时榜");
         hot.getItems().addAll(lik_hot, share_hot, fav_hot, re_hot, time_hot);
-        home_page.getItems().addAll(p);
+        home_page.getItems().addAll(p, muti);
         self.getItems().addAll(self_space, write_post);
         menuBar.getMenus().addAll(home_page, hot, self);
         String[] search1 = {"Author", "Title", "Content"};
@@ -196,26 +197,27 @@ public class window1 extends Application {
 
         setBtn_tp(searchBtn, "cadetblue", 12);
         searchBtn.setLayoutX(550);
+        g1.getChildren().addAll(menuBar, searchBy, search, searchBtn);
 
         searchBtn.setOnAction(e -> {
             stage.setTitle("Home Page");
             timeline.pause();
-            System.out.println(search.getText());
+//            System.out.println(search.getText());
             if (searchBy.getValue().equals("Author")) {
                 try {
-                    get_search(stage, g1, socket, search.getText(), "", "", 0, oos, iis);
+                    get_search(stage, g1, socket, search.getText(), "", "", -1, oos, iis);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             } else if (searchBy.getValue().equals("Title")) {
                 try {
-                    get_search(stage, g1, socket, "", search.getText(), "", 0, oos, iis);
+                    get_search(stage, g1, socket, "", search.getText(), "", -1, oos, iis);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             } else if (searchBy.getValue().equals("Content")) {
                 try {
-                    get_search(stage, g1, socket, "", "", search.getText(), 0, oos, iis);
+                    get_search(stage, g1, socket, "", "", search.getText(), -1, oos, iis);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -224,7 +226,52 @@ public class window1 extends Application {
             // set the text for the label to the selected item
         });
 
+        muti.setOnAction(e -> {
+            Stage searchMul = new Stage();
+            VBox group = new VBox();
+            Label l1 = new Label("Author:");
+            l1.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 20));
+            Label l2 = new Label("Title:");
+            l2.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 20));
+            Label l3 = new Label("Content:");
+            l3.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 20));
+            Label l4 = new Label("PostID:");
+            l4.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 20));
 
+            TextField aut = new TextField();//文本框
+            aut.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 20));
+            TextField tit = new TextField();//文本框
+            tit.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 20));
+            TextField con = new TextField();//文本框
+            con.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 20));
+            TextField pid = new TextField();//文本框
+            pid.setFont(javafx.scene.text.Font.font("Comic Sans MS", FontWeight.BOLD, 20));
+
+            Button searchMulbtn = new Button("Search");
+            setBtn_tp(searchMulbtn, "cadetblue", 20);
+            group.getChildren().addAll(l1, aut, l2, tit, l3, con, l4, pid, searchMulbtn);
+
+            searchMulbtn.setOnAction(e1 -> {
+                try {
+                    String temp = "!@#$%^&*876(*&^%$#@|$%!@#$udfdfsn13684||";
+                    String aN = (aut.getText().equals("") ? temp : aut.getText());
+                    String tN = (tit.getText().equals("") ? temp : tit.getText());
+                    String cN = (con.getText().equals("") ? temp : con.getText());
+                    if (pid.getText().equals("")) {//不按照postid搜索
+                        get_search_mul(stage, g1, socket, aN, tN, cN, -1, oos, iis);
+                    } else
+                        get_search_mul(stage, g1, socket, temp, temp, temp, Integer.parseInt(pid.getText()), oos, iis);
+                    searchMul.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+
+            });
+            Scene scene = new Scene(group, 400, 400);
+            searchMul.setScene(scene);
+
+            searchMul.show();
+        });
         lik_hot.setOnAction(e -> {
             timeline.pause();
             try {
@@ -265,7 +312,7 @@ public class window1 extends Application {
             try {
                 timeline.playFromStart();
                 stage.setTitle("Hot Lists-实时（15s刷新一次)");
-                hot_page(stage, g1, 1, 1, 1, 1, 500, 10000, 30, socket, oos, iis);
+                hot_page(stage, g1, 0, 0, 0, 0, 1, 1000000000, 30, socket, oos, iis);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -303,7 +350,6 @@ public class window1 extends Application {
                 }
         );
 
-        g1.getChildren().addAll(menuBar, searchBy, search, searchBtn);
 
         Pagination pagination = new Pagination(calPostCnt(socket, oos, iis) / 49 + 1, 0);
         pagination.setPageFactory(pageIndex -> Tables.createPage(pageIndex, 50, socket, oos, iis));
@@ -344,6 +390,22 @@ public class window1 extends Application {
     public static void get_search(Stage stage, Group g1, Socket socket, String author_name, String title, String content, int postId, ObjectOutputStream oos, ObjectInputStream iis) throws Exception {
         Pagination pagination = new Pagination(5, 0);
         pagination.setPageFactory(pageIndex -> Tables.createPage_search(pageIndex, 20, author_name, title, content, postId + "", socket, oos, iis));
+        pagination.setLayoutY(30);
+        Group group = new Group(g1, pagination);
+
+        Scene scene = new Scene(group, 600, 600);
+
+        //场景放到舞台中
+        stage.setScene(scene);
+//        stage.setX(700);//出现在屏幕中的位置
+//        stage.setY(200);
+        stage.setResizable(false);
+        stage.show();
+    }
+
+    public static void get_search_mul(Stage stage, Group g1, Socket socket, String author_name, String title, String content, int postId, ObjectOutputStream oos, ObjectInputStream iis) throws Exception {
+        Pagination pagination = new Pagination(5, 0);
+        pagination.setPageFactory(pageIndex -> Tables.createPage_search_mul(pageIndex, 20, author_name, title, content, postId + "", socket, oos, iis));
         pagination.setLayoutY(30);
         Group group = new Group(g1, pagination);
 
@@ -968,39 +1030,9 @@ public class window1 extends Application {
                                 showPic.setTitle("Picture or Video");
 //                                imageView_user.setLayoutY(400);
                                 Group group1 = new Group(imageView_user);
-                                Scene scene1 = new Scene(group1, 800, 800);
+                                Scene scene1 = new Scene(group1, image_width, image_height);
                                 showPic.setScene(scene1);
                                 showPic.show();
-//                                }
-//                                else{
-//                                    byte[] videoData =p.getFile(); // your byte array
-//
-//                                    String filePath = ".\\video.mp4";
-//                                    File file = new File(filePath);
-//                                    FileOutputStream fos = null;
-//                                    try {
-//                                        fos = new FileOutputStream(file);
-//                                    } catch (FileNotFoundException ex) {
-//                                        ex.printStackTrace();
-//                                    }
-//                                    try {
-//                                        fos.write(videoData);
-//                                        fos.close();
-//                                    } catch (IOException ex) {
-//                                        ex.printStackTrace();
-//                                    }
-//
-//                                    Media media = new Media(file.toURI().toString());
-//                                    MediaPlayer mediaPlayer = new MediaPlayer(media);
-//                                    MediaView mediaView= new MediaView(mediaPlayer);
-//                                    StackPane root = new StackPane();
-//                                    root.getChildren().add(mediaView);
-//                                    Scene scene = new Scene(root, 600, 600);
-//                                    showPic.setScene(scene);
-//                                    showPic.show();
-//                                    mediaPlayer.play();
-//
-//                                }
                             }
                         }
                 );
@@ -1170,7 +1202,7 @@ public class window1 extends Application {
             }
         } catch (Exception ex) {
             String messagew = ex.getMessage();
-            System.out.println(messagew);
+//            System.out.println(messagew);
         }
 
 
@@ -1322,7 +1354,7 @@ public class window1 extends Application {
                 }
             } catch (Exception ex) {
                 String messagew = ex.getMessage();
-                System.out.println(messagew);
+//                System.out.println(messagew);
             }
         });
 

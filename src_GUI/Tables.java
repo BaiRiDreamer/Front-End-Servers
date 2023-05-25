@@ -87,7 +87,7 @@ public class Tables {
             }
         } catch (Exception ex) {
             String message = ex.getMessage();
-            System.out.println(message);
+//            System.out.println(message);
         }
         return postData;
     }
@@ -153,7 +153,73 @@ public class Tables {
             }
         } catch (Exception ex) {
             String message = ex.getMessage();
-            System.out.println(message);
+//            System.out.println(message);
+        }
+        return postData;
+    }
+
+    public static TableView<Post> createPage_search_mul(int pageIndex, int pageSize, String author_name, String title, String content, String postId, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
+        int page = pageIndex * pageSize;
+        TableView<Post> postTable = createTable();
+        List<Post> postList = getTableData_search_mul(page, page + pageSize, author_name, title, content, postId + "", socket, oos, iis);
+        postTable.setItems(FXCollections.observableList(postList));
+
+        postTable.setPrefHeight(500);
+        postTable.setPrefWidth(600);
+//        group.getChildren().addAll(g1, postTable);
+        TableView<Post> sw = postTable;
+        postTable.setRowFactory(tv -> //双击查看post detail
+        {
+            TableRow<Post> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (!row.isEmpty())) {
+                    int p_id = sw.getSelectionModel().getSelectedItems().get(0).getPost_id();
+                    try {
+                        window1.postDetail(p_id, socket, oos, iis);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            return row;
+        });
+        return postTable;
+    }
+
+
+    public static List<Post> getTableData_search_mul(int from, int to, String author_name, String title, String content, String postId, Socket socket, ObjectOutputStream oos, ObjectInputStream iis) {
+        List<Post> postData = new ArrayList<>();
+        try {
+            Command command = new Command("searchPostOr", new String[]{author_name, title, content, postId});
+            oos.writeObject(command);
+            oos.flush();
+
+            // 接收查询结果
+            Response response = (Response) iis.readObject();
+            String post_json = response.responseContent;
+            List<Post> posts = JSON.parseArray(post_json, Post.class);
+            for (int i = from; i <= to; i++) {
+                if (posts.size() == 0) {
+                    break;
+                }
+                if (!posts.get(i).isUnKnown) {
+                    Post p = new Post();
+
+                    p.setPost_id(posts.get(i).getPost_id());
+                    p.setTitle(posts.get(i).getTitle());
+                    p.setContent(posts.get(i).getContent());
+                    if (posts.get(i).isUnKnown()) {
+                        p.setAuthor_name("Unknown");
+                    } else {
+                        p.setAuthor_name(posts.get(i).getAuthor_name());
+                    }
+                    p.setPosting_time(posts.get(i).getPosting_time());
+                    postData.add(p);
+                }
+            }
+        } catch (Exception ex) {
+            String message = ex.getMessage();
+//            System.out.println(message);
         }
         return postData;
     }
@@ -188,7 +254,7 @@ public class Tables {
 
         } catch (Exception ex) {
             String message = ex.getMessage();
-            System.out.println(message);
+//            System.out.println(message);
         }
         return postData;
     }
@@ -243,7 +309,7 @@ public class Tables {
             }
         } catch (Exception ex) {
             String message = ex.getMessage();
-            System.out.println(message);
+//            System.out.println(message);
         }
         return postData;
     }
@@ -295,7 +361,7 @@ public class Tables {
             }
         } catch (Exception ex) {
             String message = ex.getMessage();
-            System.out.println(message);
+//            System.out.println(message);
         }
         return postData;
     }
@@ -372,7 +438,7 @@ public class Tables {
             }
         } catch (Exception ex) {
             String message = ex.getMessage();
-            System.out.println(message);
+//            System.out.println(message);
         }
         return postData;
     }
@@ -415,7 +481,7 @@ public class Tables {
             }
         } catch (Exception ex) {
             String message = ex.getMessage();
-            System.out.println(message);
+//            System.out.println(message);
         }
         return postData;
     }
@@ -487,7 +553,7 @@ public class Tables {
             }
         } catch (Exception ex) {
             String message = ex.getMessage();
-            System.out.println(message);
+//            System.out.println(message);
         }
         return postData;
     }
@@ -538,7 +604,6 @@ public class Tables {
 //        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         return table;
     }
-
     public static TableView<Replies> createTable_my_reply() {
         TableView<Replies> table = new TableView<>();
         TableColumn<Replies, Integer> re_idCol = new TableColumn<>("Reply ID");
@@ -584,7 +649,7 @@ public class Tables {
             }
         } catch (Exception ex) {
             String message = ex.getMessage();
-            System.out.println(message);
+//            System.out.println(message);
         }
         return postData;
     }
@@ -652,7 +717,7 @@ public class Tables {
             }
         } catch (Exception ex) {
             String message = ex.getMessage();
-            System.out.println(message);
+//            System.out.println(message);
         }
         return postData;
     }
